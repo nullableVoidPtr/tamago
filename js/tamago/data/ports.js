@@ -2,7 +2,7 @@
   *  Port name definition table
   */
 
-module.exports = {
+export default {
 	// System block
 	0x3000: { 
 		name: "P_CPU_Bank_Ctrl", 

@@ -1,5 +1,4 @@
-var ports = require("../data/ports.js"),
-		object = require("../../util/object.js");
+import ports from "../data/ports.js";
 
 // ==== Bank Switch ====
 function write_bank(reg, value) {
@@ -101,22 +100,20 @@ var register_layout = {
 	write: undef_write 
 };
 
-module.exports = {
-	map_registers: function () {
-		// Start mapping out registers
-		for (var i = 0; i < 0x100; i++) {
-			// This is normally considered dangerous, but I need the closure
-			~function () {
-				var layout = register_layout[i] || undef_register,
-					read   = layout.read || function (reg) { return this._cpureg[reg]; },
-					write  = layout.write || function (reg, data) { this._cpureg[reg] = data; };
+export default function() {
+	// Start mapping out registers
+	for (var i = 0; i < 0x100; i++) {
+		// This is normally considered dangerous, but I need the closure
+		~function () {
+			var layout = register_layout[i] || undef_register,
+				read   = layout.read || function (reg) { return this._cpureg[reg]; },
+				write  = layout.write || function (reg, data) { this._cpureg[reg] = data; };
 
-				// Map registers to their mirrors as well
-				for (var a = 0x3000; a < 0x4000; a += 0x100) {
-					this._readbank[a+i] = read;
-					this._writebank[a+i] = write;
-				}
-			}.call(this);
-		}
+			// Map registers to their mirrors as well
+			for (var a = 0x3000; a < 0x4000; a += 0x100) {
+				this._readbank[a+i] = read;
+				this._writebank[a+i] = write;
+			}
+		}.call(this);
 	}
-};
+}

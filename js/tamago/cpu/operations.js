@@ -6,7 +6,7 @@ function set_nz(cpu, d) {
     cpu.z = !d;
 }
 
-module.exports =  {
+export default {
     // Other(verified)
     NOP: function (cpu, addr) {},
 

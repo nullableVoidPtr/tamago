@@ -1,9 +1,10 @@
-var instructions = require("../data/instructions.js"),
-		ports = require("../data/ports.js"),
-		config = require("../config.js");
+import instructions from "../data/instructions.js";
+import ports from "../data/ports.js";
+import config from "../config.js";
 
-function disassemble(count, address, cpu) {
+export default function(count, address, cpu) {
 	var i = [];
+	var d;
 
 	function z16(addr) {
 		var l = cpu.read(addr & 0xFF),
@@ -164,7 +165,3 @@ function disassemble(count, address, cpu) {
 
 	return i;
 }
-
-module.exports =  {
-	disassemble: disassemble
-};

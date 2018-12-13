@@ -2,7 +2,7 @@
   *  Instruction defintion table
   */
 
-module.exports = {
+export default {
     0: {
         "addressing": "implied",
         "instruction": "BRK",

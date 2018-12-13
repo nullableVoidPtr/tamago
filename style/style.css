@@ -19,9 +19,9 @@
  *
  *  Author - Dave Gandy
  *  ------------------------------------------------------------------------------
- *  Email: dave@fontawesome.io
+ *  Email: dave--fontawesome.io
  *  Twitter: http://twitter.com/davegandy
- *  Work: Lead Product Designer @ Kyruus - http://kyruus.com
+ *  Work: Lead Product Designer -- Kyruus - http://kyruus.com
  */
 /* FONT PATH
  * -------------------------- */
@@ -195,7 +195,7 @@ a .icon-spin {
   display: inline-block;
   text-decoration: none;
 }
-@-moz-keyframes spin {
+---moz-keyframes spin {
   0% {
     -moz-transform: rotate(0deg);
   }
@@ -203,7 +203,7 @@ a .icon-spin {
     -moz-transform: rotate(359deg);
   }
 }
-@-webkit-keyframes spin {
+---webkit-keyframes spin {
   0% {
     -webkit-transform: rotate(0deg);
   }
@@ -211,7 +211,7 @@ a .icon-spin {
     -webkit-transform: rotate(359deg);
   }
 }
-@-o-keyframes spin {
+---o-keyframes spin {
   0% {
     -o-transform: rotate(0deg);
   }
@@ -219,7 +219,7 @@ a .icon-spin {
     -o-transform: rotate(359deg);
   }
 }
-@-ms-keyframes spin {
+---ms-keyframes spin {
   0% {
     -ms-transform: rotate(0deg);
   }
@@ -227,7 +227,7 @@ a .icon-spin {
     -ms-transform: rotate(359deg);
   }
 }
-@keyframes spin {
+--keyframes spin {
   0% {
     transform: rotate(0deg);
   }
@@ -1384,25 +1384,61 @@ a .icon-flip-vertical:before {
 .icon-renren:before {
   content: "\f18b";
 }
-/*!
- * Custom CSS
- */
+
+:root {
+  --pink: #faf;
+  
+  --blue: #6FCDE3;
+  --blue-2: #5DBCD0;
+  
+  --blue-green: #4FAFAF;
+  --blue-green-2: #3E8887;
+  
+  --green: #46B986;
+  --green-2: #21A671;
+  
+  --light-grey: #EEF3F4;
+  --light-grey-2: #C1C7C9;
+  
+  --grey: #BCC3C6;
+  --grey-2: #9BA1A3;
+  
+  --dark-grey: #3D3D3D;
+  --dark-grey-2: #333333;
+  
+  --yellow: #F6C439;
+  --yellow-2: #DAAF38;
+  
+  --orange: #EE8633;
+  --orange-2: #CE7333;
+  
+  --bright-orange: #F06B2F;
+  --bright-orange-2: #E06130;
+  
+  --red: #EE5358;
+  --red-2: #D44A4D;
+  
+  --purple: #C15EA2;
+  --purple-2: #A5498E;
+  
+  --dark-purple: #55365E;
+  --dark-purple-2: #4A2F4F;
+}
+
 body {
-  background: #ffffff;
+  background: white;
   font-family: monospace;
   font-size: 14px;
 }
 tamago[debugger] {
-  display: block;
+  display: flex;
+  justify-content: space-evenly;
   position: relative;
-  color: #000000;
-}
-tamago[debugger] column {
-  display: inline-block;
+  color: black;
 }
 tamago[debugger] buttons {
-  display: block;
-  text-align: center;
+  display: flex;
+  justify-content: space-evenly;
 }
 tamago[debugger] display {
   text-align: center;
@@ -1415,9 +1451,9 @@ tamago[debugger] display figure {
   margin: 0;
 }
 tamago[debugger] display canvas {
-  border: 2px solid #ffaaff;
+  border: 2px solid var(--pink);
   display: inline-block;
-  background: #eef3f4;
+  background: var(--light-grey);
   width: 192px;
   height: 124px;
 }
@@ -1465,11 +1501,11 @@ tamago[debugger] cpu flags flag:after {
   text-decoration: inherit;
   -webkit-font-smoothing: antialiased;
   *margin-right: .3em;
-  content: "\f096";
+  content: "\2610";
   display: block;
 }
 tamago[debugger] cpu flags flag.active:after {
-  content: "\f046";
+  content: "\2611";
 }
 tamago[debugger] cpu flags flag:before {
   text-align: center;
@@ -1486,35 +1522,35 @@ tamago[debugger] disassembly instruction {
   height: 1em;
 }
 tamago[debugger] disassembly instruction.active {
-  background: #46b986;
+  background: var(--green);
 }
 tamago[debugger] disassembly instruction * {
   margin: 0;
   padding: 0 1ex;
 }
 tamago[debugger] disassembly instruction location {
-  color: #f06b2f;
+  color: var(--bright-orange);
   display: inline-block;
   width: 4ex;
 }
 tamago[debugger] disassembly instruction opcode {
-  color: #3e8887;
+  color: var(--blue-green-2);
   display: inline-block;
   width: 3ex;
 }
 tamago[debugger] disassembly instruction data {
   display: inline-block;
   width: 16ex;
-  color: #c15ea2;
+  color: var(--purple);
 }
 tamago[debugger] disassembly instruction addressing {
-  color: #5dbcd0;
+  color: var(--blue-2);
   display: inline-block;
   width: 16ex;
 }
 tamago[debugger] disassembly instruction addressing:before,
 tamago[debugger] disassembly instruction addressing:after {
-  color: #d44a4d;
+  color: var(--red-2);
   display: inline;
 }
 tamago[debugger] disassembly instruction addressing[mode=immediate]:before {
@@ -1554,18 +1590,18 @@ tamago[debugger] disassembly instruction addressing[mode=absoluteY]:after {
   content: ", Y";
 }
 tamago[debugger] disassembly instruction[port]:after {
-  color: #21a671;
+  color: var(--green-2);
   content: "; " attr(port);
   text-align: left;
 }
 tamago[debugger] disassembly instruction:nth-child(even) {
-  background: #ffffff;
+  background: white;
 }
 tamago[debugger] disassembly instruction:nth-child(odd) {
-  background: #eef3f4;
+  background: var(--light-grey);
 }
 tamago[debugger] disassembly instruction.active {
-  background: #f6c439;
+  background: var(--yellow);
 }
 tamago[debugger] port {
   display: block;
@@ -1625,11 +1661,11 @@ tamago[debugger] control row {
 }
 tamago[debugger] memory row:nth-child(even),
 tamago[debugger] control row:nth-child(even) {
-  background: #ffffff;
+  background: white;
 }
 tamago[debugger] memory row:nth-child(odd),
 tamago[debugger] control row:nth-child(odd) {
-  background: #eef3f4;
+  background: var(--light-grey);
 }
 tamago[debugger] memory row address,
 tamago[debugger] control row address {
@@ -1639,7 +1675,6 @@ tamago[debugger] control row address {
 }
 tamago[debugger] memory row byte,
 tamago[debugger] control row byte {
-  display: inline-block;
   text-align: center;
   min-width: 2ex;
   padding: 0;
@@ -1647,24 +1682,24 @@ tamago[debugger] control row byte {
 }
 tamago[debugger] memory row byte:nth-child(even),
 tamago[debugger] control row byte:nth-child(even) {
-  color: #5dbcd0;
+  color: var(--blue-2);
 }
 tamago[debugger] memory row byte:nth-child(odd),
 tamago[debugger] control row byte:nth-child(odd) {
-  color: #6fcde3;
+  color: var(--blue);
 }
 tamago[debugger] memory row byte.read,
 tamago[debugger] control row byte.read {
-  background: #d44a4d;
-  color: #ffffff;
+  background: var(--red-2);
+  color: white;
 }
 tamago[debugger] memory row byte.write,
 tamago[debugger] control row byte.write {
-  background: #21a671;
-  color: #ffffff;
+  background: var(--green-2);
+  color: white;
 }
 tamago[debugger] memory row byte.read.write,
 tamago[debugger] control row byte.read.write {
-  background: #daaf38;
-  color: #ffffff;
+  background: var(--yellow-2);
+  color: white;
 }

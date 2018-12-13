@@ -3,7 +3,7 @@
  ** NOTE: I always return addr for future auto-inlining
  **/
 
-module.exports = {
+export default {
 	implied: function (cpu) {
 		var addr = null;
 		return addr;
