@@ -383,6 +383,7 @@ class Tamago {
 				for (var b = 0; b < data.registerBytesPerLine; b ++ ) {
 					var byte = document.createElement("byte");
 					byte.setAttribute("data-address", i+b+0x3000);
+					byte.addEventListener("click", that.update_control.bind(that));
 					address.appendChild(byte);
 				}
 				row.appendChild(address);
@@ -449,31 +450,28 @@ class Tamago {
 			this.body = {
 				glyphs: element.querySelectorAll("i.glyph"),
 				port: element.querySelector("port"),
-				selects: [].reduce.call(element.querySelectorAll("select"), function (acc, f) {
+				selects: [...element.querySelectorAll("select")].reduce((acc, f) => {
 					acc[f.attributes.action.value.toLowerCase()] = f;
 					return acc;
 				}, {}),
-				flags: [].reduce.call(element.querySelectorAll("flag"), function (acc, f) {
+				flags: [...element.querySelectorAll("flag")].reduce((acc, f) => {
 					acc[f.attributes.name.value.toLowerCase()] = f;
 					return acc;
 				}, {}),
-				registers: [].reduce.call(element.querySelectorAll("register"), function (acc, r) {
+				registers: [...element.querySelectorAll("register")].reduce((acc, f) => {
 					acc[r.attributes.name.value.toLowerCase()] = r;
 					return acc;
 				}, {}),
-				instructions: [].map.call(element.querySelectorAll("instruction"), function (i) {
-					return {
+				instructions: [...element.querySelectorAll("instruction")].map(i => (
+					{
 						instruction: i,
 						location: i.querySelector("location"),
 						opcode: i.querySelector("opcode"),
 						data: i.querySelector("data"),
 						addressing: i.querySelector("addressing"),
-					};
-				}),
-				control: [].map.call(element.querySelectorAll("control byte"), function (b) {
-					b.addEventListener("click", that.update_control.bind(that));
-					return b;
-				}),
+					}
+				)),
+				control: [...element.querySelectorAll("control byte")],
 				memory: [...element.querySelectorAll("memory byte")],
 				display: element.querySelector("display canvas").getContext("2d"),
 				figure: element.querySelector("display figure")
