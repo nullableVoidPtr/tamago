@@ -47,12 +47,9 @@ class Tamago {
 
 		this.mapping = { 65: 1, 83: 2, 68: 4, 82: 8 };
 
-		document.addEventListener("keyup", function (e) {
-			that.system.keys |= that.mapping[e.keyCode] || 0;
-		});
-		document.addEventListener("keydown", function (e) {
-			that.system.keys &= ~that.mapping[e.keyCode] || 0xFF;
-		});
+		document.addEventListener("keydown", e => that.system.keys &= ~that.mapping[e.keyCode] || 0xFF);
+
+		document.addEventListener("keyup", e => that.system.keys |= that.mapping[e.keyCode] || 0);
 	}
 
 	step(e) {
@@ -132,9 +129,7 @@ class Tamago {
 		this.body.figure.innerHTML = binary.name + " inserted";
 
 		var reader = new FileReader();
-		reader.onload = function(e) {
-			that.system.insert_figure(e.target.results);
-		}
+		reader.onload = e => that.system.insert_figure(e.target.results);
 		reader.readAsArrayBuffer(binary);
 	};
 
