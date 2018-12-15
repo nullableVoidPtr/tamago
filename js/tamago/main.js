@@ -3,25 +3,6 @@ import Tamagotchi, {ACCESS_READ, ACCESS_WRITE} from "./cpu/tamagotchi.js";
 import disassemble from "./cpu/disassembler.js";
 import ports from "./data/ports.js";
 
-function getBinary(path, cb) {
-	var xhr = new XMLHttpRequest();
-	xhr.open("GET", path, true);
-	xhr.responseType = "arraybuffer";
-	xhr.send();
-
-	xhr.onreadystatechange = function () {
-		if (xhr.readyState !== 4) {
-			return ;
-		}
-
-		if (xhr.status !== 200) {
-			throw new Error("Could not download " + path);
-		}
-
-		cb(xhr.response);
-	};
-}
-
 function toHex(w, i) {
 	i = i.toString(16).toUpperCase();
 
@@ -450,15 +431,15 @@ class Tamago {
 			this.body = {
 				glyphs: element.querySelectorAll("i.glyph"),
 				port: element.querySelector("port"),
-				selects: [...element.querySelectorAll("select")].reduce((acc, f) => {
-					acc[f.attributes.action.value.toLowerCase()] = f;
+				selects: [...element.querySelectorAll("select")].reduce((acc, s) => {
+					acc[s.attributes.action.value.toLowerCase()] = s;
 					return acc;
 				}, {}),
 				flags: [...element.querySelectorAll("flag")].reduce((acc, f) => {
 					acc[f.attributes.name.value.toLowerCase()] = f;
 					return acc;
 				}, {}),
-				registers: [...element.querySelectorAll("register")].reduce((acc, f) => {
+				registers: [...element.querySelectorAll("register")].reduce((acc, r) => {
 					acc[r.attributes.name.value.toLowerCase()] = r;
 					return acc;
 				}, {}),
@@ -499,7 +480,12 @@ class Tamago {
 	};
 }
 
-getBinary("files/tamago.bin", function (bios) {
+fetch("files/tamago.bin").then(response => {
+	if (!response.ok) {
+		throw new Error("HTTP error, status = " + response.status);
+	}
+	return response.arrayBuffer();
+}).then(bios => {
 	// Start the application when BIOS is done
 	for (var elem of document.querySelectorAll("tamago")) {
 		new Tamago(elem, bios);
