@@ -8,7 +8,7 @@ export var ACCESS_WRITE = 0x02;
 export default class Tamagotchi extends r6502 {
 	constructor(bios) {
 		super();
-		debugger;
+
 		var that = this;
 
 		this._readbank = new Array(0x10000);

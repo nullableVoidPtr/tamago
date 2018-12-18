@@ -3,6 +3,56 @@ import Tamagotchi, {ACCESS_READ, ACCESS_WRITE} from "./cpu/tamagotchi.js";
 import disassemble from "./cpu/disassembler.js";
 import ports from "./data/ports.js";
 
+window.customElements.define('tamago-display', class TamagoDisplay extends HTMLElement {
+	constructor() {
+		super();
+
+		this.attachShadow({ mode: 'open' });
+		this.figureDiv = document.createElement("div");
+		this.figureDiv.classList.add('figure');
+		this.shadowRoot.appendChild(figureDiv);
+		
+		this.glyphs = [];
+		
+		var topIcons = document.createElement("div");
+		for (var icon of ["icon-dashboard", "icon-food", "icon-trash", "icon-globe", "icon-user"]) {
+			var i = document.createElement("i");
+			i.classList.add("icon");
+			i.classList.add(icon);
+			i.classList.add("glyph");
+			topIcons.appendChild(i);
+			glyphs += i;
+		}
+		this.appendChild(topIcons);
+
+		this.canvas = document.createElement("canvas");
+		canvas.width = 48;
+		canvas.height = 31;
+		this.appendChild(canvas);
+		this.pixelBuffer = canvas.getImageData(0,0,64,31);
+		this.pixels = new Uint32Array(this.pixelBuffer.data.buffer);
+
+		var bottomIcons = document.createElement("div");
+		for (var icon of ["icon-comments", "icon-medkit", "icon-heart", "icon-book", "icon-bell"]) {
+			var i = document.createElement("i");
+			i.classList.add("icon");
+			i.classList.add(icon);
+			i.classList.add("glyph");
+			bottomIcons.appendChild(i);
+			glyphs += i;
+		}
+		this.appendChild(bottomIcons);
+	}
+	
+	refresh() {
+		this.canvas.putImageData(this.pixelBuffer, 0, 0);
+	}
+
+	set figure(f) {
+		this.figureDiv.innerText = `${f} inserted`;
+	}
+});
+
 function toHex(w, i) {
 	i = i.toString(16).toUpperCase();
 
@@ -22,6 +72,7 @@ class Tamago {
 
 		this._pixeldata = this.body.display.getImageData(0,0,64,31);
 		this._pixels = new Uint32Array(this._pixeldata.data.buffer);
+		debugger;
 		this._disasmOffset = 0;
 
 		this.refresh();
@@ -135,8 +186,6 @@ class Tamago {
 
 		if (port.address.length < 2) port.address = "0" + port.address;
 
-		//this.body.port.innerHTML = portTemplate(port);
-
 		while (this.body.port.firstChild) {
 			this.body.port.removeChild(this.body.port.firstChild);
 		}
@@ -183,27 +232,26 @@ class Tamago {
 	}
 
 	refresh_debugger() {
-		var that = this;
 
 		// Update basic views
 		for (const [register, elem] of Object.entries(this.body.registers)){
-			elem.innerHTML = toHex(2, that.system[register]);
+			elem.innerHTML = toHex(2, this.system[register]);
 		}
 
 		for (const [flag, elem] of Object.entries(this.body.flags)) {
-			elem.classList.toggle("active", Boolean(that.system[flag]));
+			elem.classList.toggle("active", Boolean(this.system[flag]));
 		}
 
 		for (const [i, m] of Object.entries(this.body.memory)) {
-			m.innerHTML = toHex(2, that.system._wram[i]);
+			m.innerHTML = toHex(2, this.system._wram[i]);
 		}
 
 		for (const [i, m] of Object.entries(this.body.control)) {
-			var acc = that.system._cpuacc[i+0x3000];
-			that.system._cpuacc[i+0x3000] = 0;
+			var acc = this.system._cpuacc[i+0x3000];
+			this.system._cpuacc[i+0x3000] = 0;
 			m.classList.toggle('read', acc & ACCESS_READ);
 			m.classList.toggle('write', acc & ACCESS_WRITE);
-			m.innerHTML = toHex(2, that.system._cpureg[i]);
+			m.innerHTML = toHex(2, this.system._cpureg[i]);
 		}
 
 
@@ -221,7 +269,7 @@ class Tamago {
 		}
 
 		for (const [i, g] of Object.entries(disasm)) {
-			var row = that.body.instructions[i];
+			var row = this.body.instructions[i];
 
 			row.location.innerHTML = toHex(4, g.location)
 			row.opcode.innerHTML = g.instruction;
@@ -240,7 +288,7 @@ class Tamago {
 		}
 
 		for (var i = disasm.length; i < config.instructionCount; i++) {
-			var row = that.body.instructions[i];
+			var row = this.body.instructions[i];
 
 			row.location.innerHTML = "";
 			row.opcode.innerHTML = "";
@@ -254,14 +302,8 @@ class Tamago {
 	}
 
 	configure(element) {
-		var data = Object.create(config),
-			that = this;
 
-		data.toHex = toHex;
-		data.ramBytes = this.system._wram.length;
-		data.registerBytes = this.system._cpureg.length;
-
-		data.debug = Boolean(element.attributes.debugger);
+		var debug = Boolean(element.attributes.debugger);
 
 		var column = document.createElement("div");
 
@@ -294,7 +336,7 @@ class Tamago {
 		display.appendChild(bottomIcons);
 		column.appendChild(display);
 
-		if (data.debug) {
+		if (debug) {
 			var debuggerButtons = document.createElement("buttons");
 			for (var debugAction of ["step", "run", "reset", "nmi"]) {
 				var button = document.createElement("input");
@@ -357,14 +399,14 @@ class Tamago {
 			column.appendChild(cpu);
 
 			var control = document.createElement("control");
-			for (var i = 0; i < data.registerBytes; i += data.registerBytesPerLine ) {
+			for (var i = 0; i < this.system._cpureg.length; i += config.registerBytesPerLine ) {
 				var row = document.createElement("row");
 				var address = document.createElement("address");
 				address.innerText = toHex(4, i+0x3000);
-				for (var b = 0; b < data.registerBytesPerLine; b ++ ) {
+				for (var b = 0; b < config.registerBytesPerLine; b ++ ) {
 					var byte = document.createElement("byte");
 					byte.setAttribute("data-address", i+b+0x3000);
-					byte.addEventListener("click", that.update_control.bind(that));
+					byte.addEventListener("click", this.update_control.bind(this));
 					address.appendChild(byte);
 				}
 				row.appendChild(address);
@@ -375,10 +417,10 @@ class Tamago {
 		}
 
 		element.appendChild(column);
-		if (data.debug) {
+		if (debug) {
 			column = document.createElement("div");
 			var disassembly = document.createElement("disassembly");
-			for (var i = 0; i < data.instructionCount; i++ ) {
+			for (var i = 0; i < config.instructionCount; i++ ) {
 				var instruction = document.createElement("instruction");
 				instruction.setAttribute("port", "");
 				instruction.appendChild(document.createElement("location"));
@@ -396,11 +438,11 @@ class Tamago {
 			column = document.createElement("div");
 			column.appendChild(document.createElement("port"));
 			var memory = document.createElement("memory");
-			for (var i = 0; i < data.ramBytes; i += data.memoryBytesPerLine ) {
+			for (var i = 0; i < this.system._wram.length; i += config.memoryBytesPerLine ) {
 				var row = document.createElement("row");
 				var address = document.createElement("address");
 				address.innerText = toHex(4, i);
-				for (var b = 0; b < data.memoryBytesPerLine; b ++ ) {
+				for (var b = 0; b < config.memoryBytesPerLine; b ++ ) {
 					var byte = document.createElement("byte");
 					byte.setAttribute("data-address", i+b);
 					address.appendChild(byte);
@@ -423,9 +465,9 @@ class Tamago {
 		element.addEventListener("drop", this.drop.bind(this), false);
 
 		// Bind to HTML
-		if (data.debug) {
+		if (debug) {
 			for (var el of document.querySelectorAll("input[type=button]")) {
-				el.addEventListener("click", that[el.attributes.action.value].bind(that))
+				el.addEventListener("click", this[el.attributes.action.value].bind(this))
 			}
 
 			this.body = {
@@ -459,7 +501,7 @@ class Tamago {
 			};
 
 			document.querySelector("select[action=figure]").addEventListener("change", function(e) {
-				that.system.inserted_figure = Number(e.target.value);
+				this.system.inserted_figure = Number(e.target.value);
 			});
 
 			this._debug_port = 0x3000;
@@ -475,7 +517,7 @@ class Tamago {
 
 			this.refresh = this.refresh_simple;
 			// Start running soon
-			setTimeout(function() { that.run(); }, 10);
+			setTimeout(function() { this.run(); }, 10);
 		}
 	};
 }
