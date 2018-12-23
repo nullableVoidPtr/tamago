@@ -8,10 +8,139 @@ window.customElements.define('tamago-display', class TamagoDisplay extends HTMLE
 		super();
 
 		this.attachShadow({ mode: 'open' });
+		var style = document.createElement("style");
+/*
+ *  License
+ *  ------------------------------------------------------------------------------
+ *  - The Font Awesome font is licensed under SIL OFL 1.1 -
+ *    http://scripts.sil.org/OFL
+ *  - Font Awesome CSS, LESS, and SASS files are licensed under MIT License -
+ *    http://opensource.org/licenses/mit-license.html
+ *  - Font Awesome documentation licensed under CC BY 3.0 -
+ *    http://creativecommons.org/licenses/by/3.0/
+ *  - Attribution is no longer required in Font Awesome 3.0, but much appreciated:
+ *    "Font Awesome by Dave Gandy - http://fontawesome.io"
+ *
+ */
+		style.textContent = `
+:root {
+	--pink: #faf;
+
+	--blue: #6FCDE3;
+	--blue-2: #5DBCD0;
+
+	--blue-green: #4FAFAF;
+	--blue-green-2: #3E8887;
+
+	--green: #46B986;
+	--green-2: #21A671;
+
+	--light-grey: #EEF3F4;
+	--light-grey-2: #C1C7C9;
+
+	--grey: #BCC3C6;
+	--grey-2: #9BA1A3;
+
+	--dark-grey: #3D3D3D;
+	--dark-grey-2: #333333;
+
+	--yellow: #F6C439;
+	--yellow-2: #DAAF38;
+
+	--orange: #EE8633;
+	--orange-2: #CE7333;
+
+	--bright-orange: #F06B2F;
+	--bright-orange-2: #E06130;
+
+	--red: #EE5358;
+	--red-2: #D44A4D;
+
+	--purple: #C15EA2;
+	--purple-2: #A5498E;
+
+	--dark-purple: #55365E;
+	--dark-purple-2: #4A2F4F;
+
+	font-family: monospace;
+	font-size: 14px;
+	padding: 10px;
+	display: block;
+}
+
+* {
+	text-align: center;
+}
+
+@font-face {
+	font-family: 'FontAwesome';
+	src: url('../font/fontawesome-webfont.eot?v=3.2.1');
+	src: url('../font/fontawesome-webfont.eot?#iefix&v=3.2.1') format('embedded-opentype'), url('../font/fontawesome-webfont.woff?v=3.2.1') format('woff'), url('../font/fontawesome-webfont.ttf?v=3.2.1') format('truetype'), url('../font/fontawesome-webfont.svg#fontawesomeregular?v=3.2.1') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+[class^="icon-"],
+[class*=" icon-"] {
+	font-family: FontAwesome;
+	font-weight: normal;
+	font-style: normal;
+	text-decoration: inherit;
+	-webkit-font-smoothing: antialiased;
+	*margin-right: .3em;
+}
+[class^="icon-"]:before,
+[class*=" icon-"]:before {
+	text-decoration: inherit;
+	display: inline-block;
+	speak: none;
+}
+
+.icon-dashboard:before {
+	content: "\\f0e4";
+}
+
+.icon-food:before {
+	content: "\\f0f5";
+}
+.icon-trash:before {
+	content: "\\f014";
+}
+.icon-globe:before {
+	content: "\\f0ac";
+}
+.icon-user:before {
+	content: "\\f007";
+}
+.icon-comments:before {
+	content: "\\f086";
+}
+.icon-medkit:before {
+	content: "\\f0fa";
+}
+.icon-heart:before {
+	content: "\\f004";
+}
+.icon-book:before {
+	content: "\\f02d";
+}
+.icon-bell:before {
+	content: "\\f0a2";
+}
+
+canvas {
+	border: 2px solid var(--pink);
+	display: inline-block;
+	background: var(--light-grey);
+	width: 192px;
+	height: 124px;
+}`;
+		this.shadowRoot.appendChild(style);
+		
 		this.figureDiv = document.createElement("div");
 		this.figureDiv.classList.add('figure');
-		this.shadowRoot.appendChild(figureDiv);
-		
+		this.shadowRoot.appendChild(this.figureDiv);
+
 		this.glyphs = [];
 		
 		var topIcons = document.createElement("div");
@@ -21,15 +150,16 @@ window.customElements.define('tamago-display', class TamagoDisplay extends HTMLE
 			i.classList.add(icon);
 			i.classList.add("glyph");
 			topIcons.appendChild(i);
-			glyphs += i;
+			this.glyphs.push(i);
 		}
-		this.appendChild(topIcons);
+		this.shadowRoot.appendChild(topIcons);
 
 		this.canvas = document.createElement("canvas");
-		canvas.width = 48;
-		canvas.height = 31;
-		this.appendChild(canvas);
-		this.pixelBuffer = canvas.getImageData(0,0,64,31);
+		this.canvasContext = this.canvas.getContext('2d');
+		this.canvas.width = 48;
+		this.canvas.height = 31;
+		this.shadowRoot.appendChild(this.canvas);
+		this.pixelBuffer = this.canvasContext.getImageData(0,0,64,31);
 		this.pixels = new Uint32Array(this.pixelBuffer.data.buffer);
 
 		var bottomIcons = document.createElement("div");
@@ -39,17 +169,17 @@ window.customElements.define('tamago-display', class TamagoDisplay extends HTMLE
 			i.classList.add(icon);
 			i.classList.add("glyph");
 			bottomIcons.appendChild(i);
-			glyphs += i;
+			this.glyphs.push(i);
 		}
-		this.appendChild(bottomIcons);
+		this.shadowRoot.appendChild(bottomIcons);
 	}
 	
 	refresh() {
-		this.canvas.putImageData(this.pixelBuffer, 0, 0);
+		this.canvasContext.putImageData(this.pixelBuffer, 0, 0);
 	}
 
 	set figure(f) {
-		this.figureDiv.innerText = `${f} inserted`;
+		this.figureDiv.innerText = `${f.name} inserted`;
 	}
 });
 
@@ -70,9 +200,6 @@ class Tamago {
 
 		this.configure(element);
 
-		this._pixeldata = this.body.display.getImageData(0,0,64,31);
-		this._pixels = new Uint32Array(this._pixeldata.data.buffer);
-		debugger;
 		this._disasmOffset = 0;
 
 		this.refresh();
@@ -128,7 +255,7 @@ class Tamago {
 			var glyph = (this.system._dram[a] >> b) & 3;
 			if ((b -= 2) < 0) { b = 6; a++; }
 
-			this.body.glyphs[g++].style.color = "#" + (this.system.PALETTE[glyph] & 0xFFFFFF).toString(16);
+			this.display.glyphs[g++].style.color = "#" + (this.system.PALETTE[glyph] & 0xFFFFFF).toString(16);
 		}
 
 		var px = 0;
@@ -139,13 +266,13 @@ class Tamago {
 				var d = this.system._dram[a++], b = 6;
 
 				while (b >= 0) {
-					this._pixels[px++] = this.system.PALETTE[(d >> b) & 3];
+					this.display.pixels[px++] = this.system.PALETTE[(d >> b) & 3];
 					b -= 2;
 				}
 			}
 		}
 
-		this.body.display.putImageData(this._pixeldata, 0, 0);
+		this.display.refresh();
 	}
 
 	drop(evt) {
@@ -158,7 +285,7 @@ class Tamago {
 
 		if (files.length < 0) { return ; }
 
-		this.body.figure.innerHTML = binary.name + " inserted";
+		this.display.figure = binary;
 
 		var reader = new FileReader();
 		reader.onload = e => that.system.insert_figure(e.target.results);
@@ -306,35 +433,9 @@ class Tamago {
 		var debug = Boolean(element.attributes.debugger);
 
 		var column = document.createElement("div");
+		this.display = document.createElement("tamago-display");
 
-		var display = document.createElement("display");
-		display.appendChild(document.createElement("figure"));
-
-		var topIcons = document.createElement("div");
-		for (var icon of ["icon-dashboard", "icon-food", "icon-trash", "icon-globe", "icon-user"]) {
-			var i = document.createElement("i");
-			i.classList.add("icon");
-			i.classList.add(icon);
-			i.classList.add("glyph");
-			topIcons.appendChild(i);
-		}
-		display.appendChild(topIcons);
-
-		var canvas = document.createElement("canvas");
-		canvas.width = 48;
-		canvas.height = 31;
-		display.appendChild(canvas);
-
-		var bottomIcons = document.createElement("div");
-		for (var icon of ["icon-comments", "icon-medkit", "icon-heart", "icon-book", "icon-bell"]) {
-			var i = document.createElement("i");
-			i.classList.add("icon");
-			i.classList.add(icon);
-			i.classList.add("glyph");
-			bottomIcons.appendChild(i);
-		}
-		display.appendChild(bottomIcons);
-		column.appendChild(display);
+		column.appendChild(this.display);
 
 		if (debug) {
 			var debuggerButtons = document.createElement("buttons");
@@ -471,7 +572,6 @@ class Tamago {
 			}
 
 			this.body = {
-				glyphs: element.querySelectorAll("i.glyph"),
 				port: element.querySelector("port"),
 				selects: [...element.querySelectorAll("select")].reduce((acc, s) => {
 					acc[s.attributes.action.value.toLowerCase()] = s;
@@ -495,9 +595,7 @@ class Tamago {
 					}
 				)),
 				control: [...element.querySelectorAll("control byte")],
-				memory: [...element.querySelectorAll("memory byte")],
-				display: element.querySelector("display canvas").getContext("2d"),
-				figure: element.querySelector("display figure")
+				memory: [...element.querySelectorAll("memory byte")]
 			};
 
 			document.querySelector("select[action=figure]").addEventListener("change", function(e) {
@@ -509,12 +607,6 @@ class Tamago {
 
 			this.refresh = this.refresh_debugger;
 		} else {
-			this.body = {
-				glyphs: element.querySelectorAll("i.glyph"),
-				display: element.querySelector("display canvas").getContext("2d"),
-				figure: element.querySelector("display figure")
-			};
-
 			this.refresh = this.refresh_simple;
 			// Start running soon
 			setTimeout(function() { this.run(); }, 10);
