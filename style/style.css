@@ -291,7 +291,7 @@ tamago[debugger] port field:before {
 tamago[debugger] port field:last-child {
   padding-bottom: 1ex;
 }
-tamago[debugger] memory {
+#memory {
   height: 42em;
 }
 tamago[debugger] control {

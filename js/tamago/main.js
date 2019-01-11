@@ -153,6 +153,10 @@ window.customElements.define('hex-dump', class HexDump extends HTMLElement {
 		this.attachShadow({mode: 'open'});
 		var style = document.createElement("style");
 		style.textContent = `
+:host {
+	display: block;
+	overflow-y: scroll;
+}
 table {
 	border-collapse: collapse;
 }
@@ -207,7 +211,6 @@ td.read.write {
 	}
 
 	createTable() {
-		debugger;
 		this.bytes = [];
 		var table = document.createElement("table");
 		this.shadowRoot.appendChild(table);
@@ -443,7 +446,7 @@ class Tamago {
 			elem.classList.toggle("active", Boolean(this.system[flag]));
 		}
 
-		for (const [i, m] of Object.entries(this.body.memory)) {
+		for (const [i, m] of Object.entries(this.memory.bytes)) {
 			m.innerHTML = toHex(2, this.system._wram[i]);
 		}
 
@@ -612,20 +615,13 @@ class Tamago {
 
 			column = document.createElement("div");
 			column.appendChild(document.createElement("port"));
-			var memory = document.createElement("memory");
-			for (var i = 0; i < this.system._wram.length; i += config.memoryBytesPerLine ) {
-				var row = document.createElement("row");
-				var address = document.createElement("address");
-				address.innerText = toHex(4, i);
-				for (var b = 0; b < config.memoryBytesPerLine; b ++ ) {
-					var byte = document.createElement("byte");
-					byte.setAttribute("data-address", i+b);
-					address.appendChild(byte);
-				}
-				row.appendChild(address);
-				memory.appendChild(row);
-			}
-			column.appendChild(memory);
+
+			this.memory = document.createElement("hex-dump");
+			this.memory.rowLength = config.memoryBytesPerLine;
+			this.memory.byteLength = this.system._wram.length;
+			this.memory.height = '42em';
+			this.memory.id = "memory";
+			column.appendChild(this.memory);
 			element.appendChild(column);
 		}
 
@@ -668,9 +664,8 @@ class Tamago {
 						addressing: i.querySelector("addressing"),
 					}
 				)),
-				control: [...element.querySelectorAll("control byte")],
-				memory: [...element.querySelectorAll("memory byte")]
-			};
+				control: [...element.querySelectorAll("control byte")]
+			}
 
 			document.querySelector("select[action=figure]").addEventListener("change", function(e) {
 				this.system.inserted_figure = Number(e.target.value);
