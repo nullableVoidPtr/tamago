@@ -3,6 +3,15 @@ import Tamagotchi, {ACCESS_READ, ACCESS_WRITE} from "./cpu/tamagotchi.js";
 import disassemble from "./cpu/disassembler.js";
 import ports from "./data/ports.js";
 
+function toHex(w, i) {
+	i = i.toString(16).toUpperCase();
+
+	var zeros = "0";
+	while (zeros.length < w) { zeros += zeros; }
+
+	return zeros.substr(0, w).substr(i.length) + i;
+}
+
 window.customElements.define('tamago-display', class TamagoDisplay extends HTMLElement {
 	constructor() {
 		super();
@@ -23,61 +32,8 @@ window.customElements.define('tamago-display', class TamagoDisplay extends HTMLE
  *
  */
 		style.textContent = `
-:root {
-	--pink: #faf;
-
-	--blue: #6FCDE3;
-	--blue-2: #5DBCD0;
-
-	--blue-green: #4FAFAF;
-	--blue-green-2: #3E8887;
-
-	--green: #46B986;
-	--green-2: #21A671;
-
-	--light-grey: #EEF3F4;
-	--light-grey-2: #C1C7C9;
-
-	--grey: #BCC3C6;
-	--grey-2: #9BA1A3;
-
-	--dark-grey: #3D3D3D;
-	--dark-grey-2: #333333;
-
-	--yellow: #F6C439;
-	--yellow-2: #DAAF38;
-
-	--orange: #EE8633;
-	--orange-2: #CE7333;
-
-	--bright-orange: #F06B2F;
-	--bright-orange-2: #E06130;
-
-	--red: #EE5358;
-	--red-2: #D44A4D;
-
-	--purple: #C15EA2;
-	--purple-2: #A5498E;
-
-	--dark-purple: #55365E;
-	--dark-purple-2: #4A2F4F;
-
-	font-family: monospace;
-	font-size: 14px;
-	padding: 10px;
-	display: block;
-}
-
 * {
 	text-align: center;
-}
-
-@font-face {
-	font-family: 'FontAwesome';
-	src: url('../font/fontawesome-webfont.eot?v=3.2.1');
-	src: url('../font/fontawesome-webfont.eot?#iefix&v=3.2.1') format('embedded-opentype'), url('../font/fontawesome-webfont.woff?v=3.2.1') format('woff'), url('../font/fontawesome-webfont.ttf?v=3.2.1') format('truetype'), url('../font/fontawesome-webfont.svg#fontawesomeregular?v=3.2.1') format('svg');
-	font-weight: normal;
-	font-style: normal;
 }
 
 [class^="icon-"],
@@ -103,27 +59,35 @@ window.customElements.define('tamago-display', class TamagoDisplay extends HTMLE
 .icon-food:before {
 	content: "\\f0f5";
 }
+
 .icon-trash:before {
 	content: "\\f014";
 }
+
 .icon-globe:before {
 	content: "\\f0ac";
 }
+
 .icon-user:before {
 	content: "\\f007";
 }
+
 .icon-comments:before {
 	content: "\\f086";
 }
+
 .icon-medkit:before {
 	content: "\\f0fa";
 }
+
 .icon-heart:before {
 	content: "\\f004";
 }
+
 .icon-book:before {
 	content: "\\f02d";
 }
+
 .icon-bell:before {
 	content: "\\f0a2";
 }
@@ -183,14 +147,124 @@ canvas {
 	}
 });
 
-function toHex(w, i) {
-	i = i.toString(16).toUpperCase();
-
-	var zeros = "0";
-	while (zeros.length < w) { zeros += zeros; }
-
-	return zeros.substr(0, w).substr(i.length) + i;
+window.customElements.define('hex-dump', class HexDump extends HTMLElement {
+	constructor() {
+		super();
+		this.attachShadow({mode: 'open'});
+		var style = document.createElement("style");
+		style.textContent = `
+table {
+	border-collapse: collapse;
 }
+tr:nth-child(even) {
+	background: white;
+}
+
+tr:nth-child(odd) {
+	background: var(--light-grey);
+}
+
+th {
+	font-weight: normal;
+}
+
+th, td {
+	padding: 0;
+	font-style: italic;
+}
+
+td:nth-child(even) {
+	color: var(--blue-2);
+}
+
+td:nth-child(odd) {
+	color: var(--blue);
+}
+
+td.read {
+	background: var(--red-2);
+	color: white;
+}
+
+td.write {
+	background: var(--green-2);
+	color: white;
+}
+
+td.read.write {
+	background: var(--yellow-2);
+	color: white;
+}`;
+		this.shadowRoot.appendChild(style);
+	}
+
+	connectedCallback() {
+		if (!this.hasAttribute('row-length'))
+			this.setAttribute('row-length', 16);
+		if (!this.hasAttribute('byte-length'))
+			this.setAttribute('byte-length', 0);
+		this.createTable();
+	}
+
+	createTable() {
+		debugger;
+		this.bytes = [];
+		var table = document.createElement("table");
+		this.shadowRoot.appendChild(table);
+		var i = 0;
+		while (i < this.byteLength) {
+			if (i % this.rowLength == 0) {
+				var row = document.createElement("tr");
+				var offset = document.createElement("th");
+				offset.innerText = toHex(4, this.offset + i);
+				row.appendChild(offset);
+				table.appendChild(row);
+			}
+			var cell = document.createElement("td");
+			cell.innerText = "00";
+			cell.addEventListener("click", this.onByteClick);
+			cell.setAttribute("address", i);
+			row.appendChild(cell);
+			this.bytes.push(cell);
+			i++;
+		}
+	}
+
+	attributeChangedCallback(name, oldValue, newValue) {
+		this.setAttribute(name, newValue);
+		this.createTable();
+	}
+
+	onByteClick(e) {
+		if (this.byteCallback) {
+			this.byteCallback(e);
+		}
+	}
+
+	set byteLength(value) {
+		this.setAttribute('byte-length', value);
+    }
+
+	get byteLength() {
+		return Number(this.getAttribute('byte-length'));
+    }
+
+	set rowLength(value) {
+		this.setAttribute('row-length', value);
+    }
+
+	get rowLength() {
+		return Number(this.getAttribute('row-length'));
+    }
+
+	set offset(value) {
+		this.setAttribute('offset', value);
+    }
+
+	get offset() {
+		return Number(this.getAttribute('offset')) || 0;
+    }
+});
 
 class Tamago {
 	constructor(element, bios) {

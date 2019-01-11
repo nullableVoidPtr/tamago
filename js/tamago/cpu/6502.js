@@ -49,7 +49,7 @@ export default class r6502 {
 
 	step() {
 		// Fire pending IRQs
-		if (!this.i && this.pending_irq()) { this.irq(); }
+		if (!this.i && this.pending_irq) { this.irq(); }
 
 		var next = this.ops[this.next()];
 		if (next === undefined) { throw new Error("System has crashed (invalid operation)"); }

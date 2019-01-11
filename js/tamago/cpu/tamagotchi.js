@@ -88,7 +88,7 @@ export default class Tamagotchi extends r6502 {
 		this.nmi();
 	}
 
-	pending_irq() {
+	get pending_irq() {
 		return (this._cpureg[0x73] << 8) | this._cpureg[0x74];
 	}
 
@@ -132,8 +132,8 @@ export default class Tamagotchi extends r6502 {
 			this.rom(i + 0xC0, new Uint8Array(this.bios, i << 8, 0x100));
 		}
 
-		this._readbank[0xFFFE] = function () { return this._irqs[this.pending_irq()] & 0xFF; }
-		this._readbank[0xFFFF] = function () { return this._irqs[this.pending_irq()] >> 8; }
+		this._readbank[0xFFFE] = function () { return this._irqs[this.pending_irq] & 0xFF; }
+		this._readbank[0xFFFF] = function () { return this._irqs[this.pending_irq] >> 8; }
 
 		// Bankable rom
 		this.set_rom_page(0);	// Clear current rom page
