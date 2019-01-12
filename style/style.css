@@ -71,12 +71,12 @@
   
   --dark-purple: #55365E;
   --dark-purple-2: #4A2F4F;
+  font-family: monospace;
+  font-size: 14px;
 }
 
 body {
   background: white;
-  font-family: monospace;
-  font-size: 14px;
 }
 tamago[debugger] {
   display: flex;
@@ -159,94 +159,6 @@ tamago[debugger] cpu flags flag:before {
   text-align: center;
   content: attr(name);
   display: block;
-}
-tamago[debugger] disassembly {
-  display: block;
-}
-tamago[debugger] disassembly instruction {
-  display: block;
-  position: relative;
-  min-width: 80ex;
-  height: 1em;
-}
-tamago[debugger] disassembly instruction * {
-  margin: 0;
-  padding: 0 1ex;
-}
-tamago[debugger] disassembly instruction location {
-  color: var(--bright-orange);
-  display: inline-block;
-  width: 4ex;
-}
-tamago[debugger] disassembly instruction opcode {
-  color: var(--blue-green-2);
-  display: inline-block;
-  width: 3ex;
-}
-tamago[debugger] disassembly instruction data {
-  display: inline-block;
-  width: 16ex;
-  color: var(--purple);
-}
-tamago[debugger] disassembly instruction addressing {
-  color: var(--blue-2);
-  display: inline-block;
-  width: 16ex;
-}
-tamago[debugger] disassembly instruction addressing:before,
-tamago[debugger] disassembly instruction addressing:after {
-  color: var(--red-2);
-  display: inline;
-}
-tamago[debugger] disassembly instruction addressing[mode=immediate]:before {
-  content: "#$";
-}
-tamago[debugger] disassembly instruction addressing[mode=absolute]:before,
-tamago[debugger] disassembly instruction addressing[mode=absoluteX]:before,
-tamago[debugger] disassembly instruction addressing[mode=absoluteY]:before,
-tamago[debugger] disassembly instruction addressing[mode=zeropage]:before,
-tamago[debugger] disassembly instruction addressing[mode=zeropageX]:before,
-tamago[debugger] disassembly instruction addressing[mode=zeropageY]:before {
-  content: "$";
-}
-tamago[debugger] disassembly instruction addressing[mode=indirect]::before,
-tamago[debugger] disassembly instruction addressing[mode=indirectX]::before,
-tamago[debugger] disassembly instruction addressing[mode=indirectY]::before {
-  content: "(";
-}
-tamago[debugger] disassembly instruction addressing[mode=indirect]:after {
-  content: ")";
-}
-tamago[debugger] disassembly instruction addressing[mode=relative]:after {
-  content: " ;" attr(address);
-}
-tamago[debugger] disassembly instruction addressing[mode=indirectX]:after {
-  content: ", X)";
-}
-tamago[debugger] disassembly instruction addressing[mode=indirectY]:after {
-  content: ", Y)";
-}
-tamago[debugger] disassembly instruction addressing[mode=zeropageX]:after,
-tamago[debugger] disassembly instruction addressing[mode=absoluteX]:after {
-  content: ", X";
-}
-tamago[debugger] disassembly instruction addressing[mode=zeropageY]:after,
-tamago[debugger] disassembly instruction addressing[mode=absoluteY]:after {
-  content: ", Y";
-}
-tamago[debugger] disassembly instruction[port]:after {
-  color: var(--green-2);
-  content: "; " attr(port);
-  text-align: left;
-}
-tamago[debugger] disassembly instruction:nth-child(even) {
-  background: white;
-}
-tamago[debugger] disassembly instruction:nth-child(odd) {
-  background: var(--light-grey);
-}
-tamago[debugger] disassembly instruction.active {
-  background: var(--yellow);
 }
 tamago[debugger] port {
   display: block;

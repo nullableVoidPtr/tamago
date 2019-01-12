@@ -101,13 +101,13 @@ window.customElements.define('tamago-display', class TamagoDisplay extends HTMLE
 			}
 		`;
 		this.shadowRoot.appendChild(style);
-		
+
 		this.figureDiv = document.createElement("div");
 		this.figureDiv.classList.add('figure');
 		this.shadowRoot.appendChild(this.figureDiv);
 
 		this.glyphs = [];
-		
+
 		var topIcons = document.createElement("div");
 		for (var icon of ["icon-dashboard", "icon-food", "icon-trash", "icon-globe", "icon-user"]) {
 			var i = document.createElement("i");
@@ -138,7 +138,7 @@ window.customElements.define('tamago-display', class TamagoDisplay extends HTMLE
 		}
 		this.shadowRoot.appendChild(bottomIcons);
 	}
-	
+
 	refresh() {
 		this.canvasContext.putImageData(this.pixelBuffer, 0, 0);
 	}
@@ -160,38 +160,38 @@ window.customElements.define('hex-dump', class HexDump extends HTMLElement {
 			tr:nth-child(even) {
 				background: white;
 			}
-			
+
 			tr:nth-child(odd) {
 				background: var(--light-grey);
 			}
-			
+
 			th {
 				font-weight: normal;
 			}
-			
+
 			th, td {
 				padding: 0;
 				font-style: italic;
 			}
-			
+
 			td:nth-child(even) {
 				color: var(--blue-2);
 			}
-			
+
 			td:nth-child(odd) {
 				color: var(--blue);
 			}
-			
+
 			td.read {
 				background: var(--red-2);
 				color: white;
 			}
-			
+
 			td.write {
 				background: var(--green-2);
 				color: white;
 			}
-			
+
 			td.read.write {
 				background: var(--yellow-2);
 				color: white;
@@ -274,22 +274,25 @@ window.customElements.define('disassembly-listing', class Disassembly extends HT
 	constructor() {
 		super();
 		this.attachShadow({mode: 'open'});
-		debugger;
 		var style = document.createElement("style");
 		style.textContent = `
 			table {
 				min-width: 80ex;
 				border-collapse: collapse;
 			}
-			
-			tr {
-				height: 1ex;
+
+			colgroup {
+				display: table-column-group;
 			}
-			
+
+			tr {
+				height: 1em;
+			}
+
 			tr:nth-child(even) {
 				background: white;
 			}
-			
+
 			tr:nth-child(odd) {
 				background: var(--light-grey);
 			}
@@ -297,38 +300,71 @@ window.customElements.define('disassembly-listing', class Disassembly extends HT
 			tr.active {
 				background: var(--yellow);
 			}
-			tamago[debugger] disassembly instruction addressing[mode=absolute]:before,
-			tamago[debugger] disassembly instruction addressing[mode=absoluteX]:before,
-			tamago[debugger] disassembly instruction addressing[mode=absoluteY]:before,
-			tamago[debugger] disassembly instruction addressing[mode=zeropage]:before,
-			tamago[debugger] disassembly instruction addressing[mode=zeropageX]:before,
-			tamago[debugger] disassembly instruction addressing[mode=zeropageY]:before {
+
+			td {
+				padding-left: 1ex;
+			}
+
+			td:nth-child(1) {
+				color: var(--bright-orange);
+				width: 4ex;
+			}
+
+			td:nth-child(2) {
+				color: var(--blue-green-2);
+				width: 3ex;
+			}
+			td:nth-child(3) {
+				color: var(--purple);
+				width: 16ex;
+			}
+
+			
+			td:nth-child(3)[mode=absolute]:before,
+			td:nth-child(3)[mode=absoluteX]:before,
+			td:nth-child(3)[mode=absoluteY]:before,
+			td:nth-child(3)[mode=zeropage]:before,
+			td:nth-child(3)[mode=zeropageX]:before,
+			td:nth-child(3)[mode=zeropageY]:before {
 				content: "$";
 			}
-			tamago[debugger] disassembly instruction addressing[mode=indirect]::before,
-			tamago[debugger] disassembly instruction addressing[mode=indirectX]::before,
-			tamago[debugger] disassembly instruction addressing[mode=indirectY]::before {
+			td:nth-child(3)[mode=indirect]::before,
+			td:nth-child(3)[mode=indirectX]::before,
+			td:nth-child(3)[mode=indirectY]::before {
 				content: "(";
 			}
-			tamago[debugger] disassembly instruction addressing[mode=indirect]:after {
+			td:nth-child(3)[mode=indirect]:after {
 				content: ")";
 			}
-			tamago[debugger] disassembly instruction addressing[mode=relative]:after {
+			td:nth-child(3)[mode=relative]:after {
 				content: " ;" attr(address);
 			}
-			tamago[debugger] disassembly instruction addressing[mode=indirectX]:after {
+			td:nth-child(3)[mode=indirectX]:after {
 				content: ", X)";
 			}
-			tamago[debugger] disassembly instruction addressing[mode=indirectY]:after {
+			td:nth-child(3)[mode=indirectY]:after {
 				content: ", Y)";
 			}
-			tamago[debugger] disassembly instruction addressing[mode=zeropageX]:after,
-			tamago[debugger] disassembly instruction addressing[mode=absoluteX]:after {
+			td:nth-child(3)[mode=zeropageX]:after,
+			td:nth-child(3)[mode=absoluteX]:after {
 				content: ", X";
 			}
-			tamago[debugger] disassembly instruction addressing[mode=zeropageY]:after,
-			tamago[debugger] disassembly instruction addressing[mode=absoluteY]:after {
+			td:nth-child(3)[mode=zeropageY]:after,
+			td:nth-child(3)[mode=absoluteY]:after {
 				content: ", Y";
+			}
+
+			td:nth-child(4) {
+				color: var(--purple);
+				width: 16ex;
+			}
+
+			td:nth-child(5) {
+				color: var(--green-2);
+			}
+			td:nth-child(5):not(:empty):before {
+				color: var(--green-2);
+				content: "; ";
 			}
 		`;
 		this.shadowRoot.appendChild(style);
@@ -350,70 +386,67 @@ window.customElements.define('disassembly-listing', class Disassembly extends HT
 		var colgroup = document.createElement("colgroup");
 		table.appendChild(colgroup);
 		var addressCol = document.createElement("col");
-		addressCol.style = "color: var(--bright-orange); width: 4ex";
+		addressCol.style = "";
 		colgroup.appendChild(addressCol);
 		var opcodeCol = document.createElement("col");
-		opcodeCol.style = "color: var(--blue-green-2); width: 3ex";
+		opcodeCol.style = "";
 		colgroup.appendChild(opcodeCol);
 		var operandCol = document.createElement("col");
-		operandCol.style = "color: var(--purple); width: 16ex";
+		operandCol.style = "";
 		colgroup.appendChild(operandCol);
 		var hexCol = document.createElement("col");
-		hexCol.style = "color: var(--purple); width: 16ex";
+		hexCol.style = "";
 		colgroup.appendChild(hexCol);
 		var commentCol = document.createElement("col");
-		commentCol.style = "color: var(--green-2)";
+		commentCol.style = "";
 		colgroup.appendChild(commentCol);
-		
-		for (var i = 0; i < config.instructionCount; i++ ) {
-			var row = document.createElement("tr");
-			this.instructions = [];
-			var instruction = {
+
+		this.instructions = [];
+		for (var i = 0; i < this.instructionCount; i++ ) {
+			var instruction = document.createElement("tr");
+			for (var [name, cell]of Object.entries({
 				address: document.createElement("td"),
 				opcode: document.createElement("td"),
 				operand: document.createElement("td"),
 				hex: document.createElement("td"),
 				comment: document.createElement("td"),
+			})) {
+				instruction.appendChild(cell);
+				instruction[name] = cell;
 			}
 			this.instructions.push(instruction);
-			for (var cell of Object.values(instruction)) {
-				row.appendChild(cell);
-			}
-			table.appendChild(row);
+			table.appendChild(instruction);
 		}
 	}
-	
-	update(system, offset) {
-		for (const [i, g] of Object.entries(disasm)) {
-			var row = this.instructions[i];
 
-			row.address.innerHTML = toHex(4, g.location)
-			row.opcode.innerHTML = g.instruction;
-			row.operand.innerHTML = ((g.data === null) ? "" : g.data).toString(16).toUpperCase();
-			row.hex.innerHTML = g.bytes;
-			row.comment.innerHTML g.port;
+	update(system, offset) {
+		var disasm = disassemble(config.instructionCount, offset, system);
+		for (const [i, g] of Object.entries(disasm)) {
+			var instruction = this.instructions[i];
+			instruction.address.innerHTML = toHex(4, g.location)
+			instruction.opcode.innerHTML = g.instruction;
+			instruction.operand.innerHTML = ((g.data === null) ? "" : g.data).toString(16).toUpperCase();
+			instruction.hex.innerHTML = g.bytes;
+			instruction.comment.innerHTML = g.port || "";
+			instruction.classList.toggle("active", g.active === true);
 
 			function attr(node, attr, value) {
 				if(value !== undefined) { node.setAttribute(attr, value) }
 				else node.removeAttribute(attr);
 			}
-
-			row.instruction.classList.toggle("active", g.active === true);
-			attr(row.operand, 'mode', g.mode);
-			attr(row.operand, 'address', (g.address || 0).toString(16).toUpperCase());
+			attr(instruction.operand, 'mode', g.mode);
+			attr(instruction.operand, 'address', (g.address || 0).toString(16).toUpperCase());
 		}
 
-		for (var i = disasm.length; i < this.instructionCount; i++) {
-			var row = this.instructions[i];
-
-			row.address.innerHTML = "";
-			row.opcode.innerHTML = "";
-			row.operand.innerHTML = "";
-			row.hex.innerHTML = "";
-			row.operand.removeAttribute('mode');
+		for (var instruction of this.instructions.slice(disasm.length)) {
+			instruction.address.innerHTML = "";
+			instruction.opcode.innerHTML = "";
+			instruction.operand.innerHTML = "";
+			instruction.hex.innerHTML = "";
+			instruction.operand.removeAttribute('mode');
 		}
 	}
-	
+
 	set instructionCount(value) {
 		this.setAttribute('instruction-count', value);
     }
@@ -618,38 +651,11 @@ class Tamago {
 		// PC isn't were it should be
 		if (current === null) {
 			this._disasmOffset = this.system.pc;
-			disasm = disassemble(config.instructionCount, this._disasmOffset, this.system);
 		} else if (current >= bias && disasm.length == config.instructionCount) {
 			this._disasmOffset = disasm[current-bias].location;
-			disasm = disassemble(config.instructionCount, this._disasmOffset, this.system);
 		}
 
-		for (const [i, g] of Object.entries(disasm)) {
-			var row = this.body.instructions[i];
-
-			row.location.innerHTML = toHex(4, g.location)
-			row.opcode.innerHTML = g.instruction;
-			row.addressing.innerHTML = ((g.data === null) ? "" : g.data).toString(16).toUpperCase();
-			row.data.innerHTML = g.bytes;
-
-			function attr(node, attr, value) {
-				if(value !== undefined) { node.setAttribute(attr, value) }
-				else node.removeAttribute(attr);
-			}
-
-			row.instruction.classList.toggle("active", g.active === true);
-			attr(row.addressing, 'mode', g.mode);
-			attr(row.addressing, 'address', (g.address || 0).toString(16).toUpperCase());
-			attr(row.instruction, 'port', g.port);
-		}
-
-		for (var row of this.body.instructions.slice(disasm.length)) {
-			row.location.innerHTML = "";
-			row.opcode.innerHTML = "";
-			row.addressing.innerHTML = "";
-			row.data.innerHTML = "";
-			row.addressing.removeAttribute('mode');
-		}
+		this.disassembly.update(this.system, this._disasmOffset);
 
 		this.refresh_port();
 		this.refresh_simple();
@@ -738,20 +744,8 @@ class Tamago {
 		element.appendChild(column);
 		if (debug) {
 			column = document.createElement("div");
-			var disassembly = document.createElement("disassembly");
-			for (var i = 0; i < config.instructionCount; i++ ) {
-				var instruction = document.createElement("instruction");
-				instruction.setAttribute("port", "");
-				instruction.appendChild(document.createElement("location"));
-				instruction.appendChild(document.createElement("opcode"));
-				var instructionAddressing = document.createElement("addressing");
-				instructionAddressing.setAttribute("mode", "");
-				instructionAddressing.setAttribute("address", "");
-				instruction.appendChild(instructionAddressing);
-				instruction.appendChild(document.createElement("data"));
-				disassembly.appendChild(instruction);
-			}
-			column.appendChild(disassembly);
+			this.disassembly = document.createElement("disassembly-listing");
+			column.appendChild(this.disassembly);
 			element.appendChild(column);
 
 			column = document.createElement("div");
@@ -794,16 +788,7 @@ class Tamago {
 				registers: [...element.querySelectorAll("register")].reduce((acc, r) => {
 					acc[r.attributes.name.value.toLowerCase()] = r;
 					return acc;
-				}, {}),
-				instructions: [...element.querySelectorAll("instruction")].map(i => (
-					{
-						instruction: i,
-						location: i.querySelector("location"),
-						opcode: i.querySelector("opcode"),
-						data: i.querySelector("data"),
-						addressing: i.querySelector("addressing"),
-					}
-				))
+				}, {})
 			}
 
 			document.querySelector("select[action=figure]").addEventListener("change", function(e) {
