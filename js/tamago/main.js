@@ -297,6 +297,39 @@ window.customElements.define('disassembly-listing', class Disassembly extends HT
 			tr.active {
 				background: var(--yellow);
 			}
+			tamago[debugger] disassembly instruction addressing[mode=absolute]:before,
+			tamago[debugger] disassembly instruction addressing[mode=absoluteX]:before,
+			tamago[debugger] disassembly instruction addressing[mode=absoluteY]:before,
+			tamago[debugger] disassembly instruction addressing[mode=zeropage]:before,
+			tamago[debugger] disassembly instruction addressing[mode=zeropageX]:before,
+			tamago[debugger] disassembly instruction addressing[mode=zeropageY]:before {
+				content: "$";
+			}
+			tamago[debugger] disassembly instruction addressing[mode=indirect]::before,
+			tamago[debugger] disassembly instruction addressing[mode=indirectX]::before,
+			tamago[debugger] disassembly instruction addressing[mode=indirectY]::before {
+				content: "(";
+			}
+			tamago[debugger] disassembly instruction addressing[mode=indirect]:after {
+				content: ")";
+			}
+			tamago[debugger] disassembly instruction addressing[mode=relative]:after {
+				content: " ;" attr(address);
+			}
+			tamago[debugger] disassembly instruction addressing[mode=indirectX]:after {
+				content: ", X)";
+			}
+			tamago[debugger] disassembly instruction addressing[mode=indirectY]:after {
+				content: ", Y)";
+			}
+			tamago[debugger] disassembly instruction addressing[mode=zeropageX]:after,
+			tamago[debugger] disassembly instruction addressing[mode=absoluteX]:after {
+				content: ", X";
+			}
+			tamago[debugger] disassembly instruction addressing[mode=zeropageY]:after,
+			tamago[debugger] disassembly instruction addressing[mode=absoluteY]:after {
+				content: ", Y";
+			}
 		`;
 		this.shadowRoot.appendChild(style);
 	}
@@ -333,12 +366,51 @@ window.customElements.define('disassembly-listing', class Disassembly extends HT
 		colgroup.appendChild(commentCol);
 		
 		for (var i = 0; i < config.instructionCount; i++ ) {
-			var instruction = document.createElement("tr");
-			instruction.appendChild(document.createElement("td"));
-			instruction.appendChild(document.createElement("td"));
-			var instructionAddressing = document.createElement("td");
-			instruction.appendChild(document.createElement("td"));
-			table.appendChild(instruction);
+			var row = document.createElement("tr");
+			this.instructions = [];
+			var instruction = {
+				address: document.createElement("td"),
+				opcode: document.createElement("td"),
+				operand: document.createElement("td"),
+				hex: document.createElement("td"),
+				comment: document.createElement("td"),
+			}
+			this.instructions.push(instruction);
+			for (var cell of Object.values(instruction)) {
+				row.appendChild(cell);
+			}
+			table.appendChild(row);
+		}
+	}
+	
+	update(system, offset) {
+		for (const [i, g] of Object.entries(disasm)) {
+			var row = this.instructions[i];
+
+			row.address.innerHTML = toHex(4, g.location)
+			row.opcode.innerHTML = g.instruction;
+			row.operand.innerHTML = ((g.data === null) ? "" : g.data).toString(16).toUpperCase();
+			row.hex.innerHTML = g.bytes;
+			row.comment.innerHTML g.port;
+
+			function attr(node, attr, value) {
+				if(value !== undefined) { node.setAttribute(attr, value) }
+				else node.removeAttribute(attr);
+			}
+
+			row.instruction.classList.toggle("active", g.active === true);
+			attr(row.operand, 'mode', g.mode);
+			attr(row.operand, 'address', (g.address || 0).toString(16).toUpperCase());
+		}
+
+		for (var i = disasm.length; i < this.instructionCount; i++) {
+			var row = this.instructions[i];
+
+			row.address.innerHTML = "";
+			row.opcode.innerHTML = "";
+			row.operand.innerHTML = "";
+			row.hex.innerHTML = "";
+			row.operand.removeAttribute('mode');
 		}
 	}
 	
@@ -390,7 +462,6 @@ class Tamago {
 
 		function frame() {
 			if (!that.running) { return ; }
-
 			that.system.step_realtime();
 			that.refresh();
 			requestAnimationFrame(frame);
