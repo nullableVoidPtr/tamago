@@ -169,9 +169,6 @@ tamago[debugger] disassembly instruction {
   min-width: 80ex;
   height: 1em;
 }
-tamago[debugger] disassembly instruction.active {
-  background: var(--green);
-}
 tamago[debugger] disassembly instruction * {
   margin: 0;
   padding: 0 1ex;
@@ -291,63 +288,14 @@ tamago[debugger] port field:before {
 tamago[debugger] port field:last-child {
   padding-bottom: 1ex;
 }
-#memory {
+
+tamago[debugger] hex-dump {
+	display: block;
+	overflow-y: scroll;
+}
+.memory {
   height: 42em;
 }
-tamago[debugger] control {
+.control {
   height: 24em;
-}
-tamago[debugger] memory,
-tamago[debugger] control {
-  display: block;
-  overflow-y: scroll;
-}
-tamago[debugger] memory row,
-tamago[debugger] control row {
-  height: 1em;
-  display: block;
-}
-tamago[debugger] memory row:nth-child(even),
-tamago[debugger] control row:nth-child(even) {
-  background: white;
-}
-tamago[debugger] memory row:nth-child(odd),
-tamago[debugger] control row:nth-child(odd) {
-  background: var(--light-grey);
-}
-tamago[debugger] memory row address,
-tamago[debugger] control row address {
-  display: inline-block;
-  width: 36px;
-  text-align: center;
-}
-tamago[debugger] memory row byte,
-tamago[debugger] control row byte {
-  text-align: center;
-  min-width: 2ex;
-  padding: 0;
-  margin: 0;
-}
-tamago[debugger] memory row byte:nth-child(even),
-tamago[debugger] control row byte:nth-child(even) {
-  color: var(--blue-2);
-}
-tamago[debugger] memory row byte:nth-child(odd),
-tamago[debugger] control row byte:nth-child(odd) {
-  color: var(--blue);
-}
-tamago[debugger] memory row byte.read,
-tamago[debugger] control row byte.read {
-  background: var(--red-2);
-  color: white;
-}
-tamago[debugger] memory row byte.write,
-tamago[debugger] control row byte.write {
-  background: var(--green-2);
-  color: white;
-}
-tamago[debugger] memory row byte.read.write,
-tamago[debugger] control row byte.read.write {
-  background: var(--yellow-2);
-  color: white;
 }

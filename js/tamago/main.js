@@ -18,87 +18,88 @@ window.customElements.define('tamago-display', class TamagoDisplay extends HTMLE
 
 		this.attachShadow({ mode: 'open' });
 		var style = document.createElement("style");
-/*
- *  License
- *  ------------------------------------------------------------------------------
- *  - The Font Awesome font is licensed under SIL OFL 1.1 -
- *    http://scripts.sil.org/OFL
- *  - Font Awesome CSS, LESS, and SASS files are licensed under MIT License -
- *    http://opensource.org/licenses/mit-license.html
- *  - Font Awesome documentation licensed under CC BY 3.0 -
- *    http://creativecommons.org/licenses/by/3.0/
- *  - Attribution is no longer required in Font Awesome 3.0, but much appreciated:
- *    "Font Awesome by Dave Gandy - http://fontawesome.io"
- *
- */
+		/*
+		 *  License
+		 *  ------------------------------------------------------------------------------
+		 *  - The Font Awesome font is licensed under SIL OFL 1.1 -
+		 *    http://scripts.sil.org/OFL
+		 *  - Font Awesome CSS, LESS, and SASS files are licensed under MIT License -
+		 *    http://opensource.org/licenses/mit-license.html
+		 *  - Font Awesome documentation licensed under CC BY 3.0 -
+		 *    http://creativecommons.org/licenses/by/3.0/
+		 *  - Attribution is no longer required in Font Awesome 3.0, but much appreciated:
+		 *    "Font Awesome by Dave Gandy - http://fontawesome.io"
+		 *
+		 */
 		style.textContent = `
-* {
-	text-align: center;
-}
+			* {
+				text-align: center;
+			}
 
-[class^="icon-"],
-[class*=" icon-"] {
-	font-family: FontAwesome;
-	font-weight: normal;
-	font-style: normal;
-	text-decoration: inherit;
-	-webkit-font-smoothing: antialiased;
-	*margin-right: .3em;
-}
-[class^="icon-"]:before,
-[class*=" icon-"]:before {
-	text-decoration: inherit;
-	display: inline-block;
-	speak: none;
-}
+			[class^="icon-"],
+			[class*=" icon-"] {
+				font-family: FontAwesome;
+				font-weight: normal;
+				font-style: normal;
+				text-decoration: inherit;
+				-webkit-font-smoothing: antialiased;
+				*margin-right: .3em;
+			}
+			[class^="icon-"]:before,
+			[class*=" icon-"]:before {
+				text-decoration: inherit;
+				display: inline-block;
+				speak: none;
+			}
 
-.icon-dashboard:before {
-	content: "\\f0e4";
-}
+			.icon-dashboard:before {
+				content: "\\f0e4";
+			}
 
-.icon-food:before {
-	content: "\\f0f5";
-}
+			.icon-food:before {
+				content: "\\f0f5";
+			}
 
-.icon-trash:before {
-	content: "\\f014";
-}
+			.icon-trash:before {
+				content: "\\f014";
+			}
 
-.icon-globe:before {
-	content: "\\f0ac";
-}
+			.icon-globe:before {
+				content: "\\f0ac";
+			}
 
-.icon-user:before {
-	content: "\\f007";
-}
+			.icon-user:before {
+				content: "\\f007";
+			}
 
-.icon-comments:before {
-	content: "\\f086";
-}
+			.icon-comments:before {
+				content: "\\f086";
+			}
 
-.icon-medkit:before {
-	content: "\\f0fa";
-}
+			.icon-medkit:before {
+				content: "\\f0fa";
+			}
 
-.icon-heart:before {
-	content: "\\f004";
-}
+			.icon-heart:before {
+				content: "\\f004";
+			}
 
-.icon-book:before {
-	content: "\\f02d";
-}
+			.icon-book:before {
+				content: "\\f02d";
+			}
 
-.icon-bell:before {
-	content: "\\f0a2";
-}
+			.icon-bell:before {
+				content: "\\f0a2";
+			}
 
-canvas {
-	border: 2px solid var(--pink);
-	display: inline-block;
-	background: var(--light-grey);
-	width: 192px;
-	height: 124px;
-}`;
+			canvas {
+				border: 2px solid var(--pink);
+				display: inline-block;
+				background: var(--light-grey);
+				width: 192px;
+				height: 124px;
+			}
+		`;
 		this.shadowRoot.appendChild(style);
 		
 		this.figureDiv = document.createElement("div");
@@ -153,52 +154,49 @@ window.customElements.define('hex-dump', class HexDump extends HTMLElement {
 		this.attachShadow({mode: 'open'});
 		var style = document.createElement("style");
 		style.textContent = `
-:host {
-	display: block;
-	overflow-y: scroll;
-}
-table {
-	border-collapse: collapse;
-}
-tr:nth-child(even) {
-	background: white;
-}
-
-tr:nth-child(odd) {
-	background: var(--light-grey);
-}
-
-th {
-	font-weight: normal;
-}
-
-th, td {
-	padding: 0;
-	font-style: italic;
-}
-
-td:nth-child(even) {
-	color: var(--blue-2);
-}
-
-td:nth-child(odd) {
-	color: var(--blue);
-}
-
-td.read {
-	background: var(--red-2);
-	color: white;
-}
-
-td.write {
-	background: var(--green-2);
-	color: white;
-}
-
-td.read.write {
-	background: var(--yellow-2);
-	color: white;
-}`;
+			table {
+				border-collapse: collapse;
+			}
+			tr:nth-child(even) {
+				background: white;
+			}
+			
+			tr:nth-child(odd) {
+				background: var(--light-grey);
+			}
+			
+			th {
+				font-weight: normal;
+			}
+			
+			th, td {
+				padding: 0;
+				font-style: italic;
+			}
+			
+			td:nth-child(even) {
+				color: var(--blue-2);
+			}
+			
+			td:nth-child(odd) {
+				color: var(--blue);
+			}
+			
+			td.read {
+				background: var(--red-2);
+				color: white;
+			}
+			
+			td.write {
+				background: var(--green-2);
+				color: white;
+			}
+			
+			td.read.write {
+				background: var(--yellow-2);
+				color: white;
+			}
+		`;
 		this.shadowRoot.appendChild(style);
 	}
 
@@ -212,6 +210,9 @@ td.read.write {
 
 	createTable() {
 		this.bytes = [];
+		if (this.shadowRoot.querySelector("table")) {
+			this.shadowRoot.removeChild(this.shadowRoot.querySelector("table"));
+		}
 		var table = document.createElement("table");
 		this.shadowRoot.appendChild(table);
 		var i = 0;
@@ -225,8 +226,8 @@ td.read.write {
 			}
 			var cell = document.createElement("td");
 			cell.innerText = "00";
-			cell.addEventListener("click", this.onByteClick);
-			cell.setAttribute("address", i);
+			cell.addEventListener("click", this.onByteClick.bind(this));
+			cell.setAttribute("data-address", this.offset + i);
 			row.appendChild(cell);
 			this.bytes.push(cell);
 			i++;
@@ -266,6 +267,87 @@ td.read.write {
 
 	get offset() {
 		return Number(this.getAttribute('offset')) || 0;
+    }
+});
+
+window.customElements.define('disassembly-listing', class Disassembly extends HTMLElement {
+	constructor() {
+		super();
+		this.attachShadow({mode: 'open'});
+		debugger;
+		var style = document.createElement("style");
+		style.textContent = `
+			table {
+				min-width: 80ex;
+				border-collapse: collapse;
+			}
+			
+			tr {
+				height: 1ex;
+			}
+			
+			tr:nth-child(even) {
+				background: white;
+			}
+			
+			tr:nth-child(odd) {
+				background: var(--light-grey);
+			}
+
+			tr.active {
+				background: var(--yellow);
+			}
+		`;
+		this.shadowRoot.appendChild(style);
+	}
+
+	connectedCallback() {
+		if (!this.hasAttribute('instruction-count'))
+			this.setAttribute('instruction-count', 55);
+		this.createTable();
+	}
+
+	createTable() {
+		this.bytes = [];
+		if (this.shadowRoot.querySelector("table")) {
+			this.shadowRoot.removeChild(this.shadowRoot.querySelector("table"));
+		}
+		var table = document.createElement("table");
+		this.shadowRoot.appendChild(table);
+		var colgroup = document.createElement("colgroup");
+		table.appendChild(colgroup);
+		var addressCol = document.createElement("col");
+		addressCol.style = "color: var(--bright-orange); width: 4ex";
+		colgroup.appendChild(addressCol);
+		var opcodeCol = document.createElement("col");
+		opcodeCol.style = "color: var(--blue-green-2); width: 3ex";
+		colgroup.appendChild(opcodeCol);
+		var operandCol = document.createElement("col");
+		operandCol.style = "color: var(--purple); width: 16ex";
+		colgroup.appendChild(operandCol);
+		var hexCol = document.createElement("col");
+		hexCol.style = "color: var(--purple); width: 16ex";
+		colgroup.appendChild(hexCol);
+		var commentCol = document.createElement("col");
+		commentCol.style = "color: var(--green-2)";
+		colgroup.appendChild(commentCol);
+		
+		for (var i = 0; i < config.instructionCount; i++ ) {
+			var instruction = document.createElement("tr");
+			instruction.appendChild(document.createElement("td"));
+			instruction.appendChild(document.createElement("td"));
+			var instructionAddressing = document.createElement("td");
+			instruction.appendChild(document.createElement("td"));
+			table.appendChild(instruction);
+		}
+	}
+	
+	set instructionCount(value) {
+		this.setAttribute('instruction-count', value);
+    }
+
+	get instructionCount() {
+		return Number(this.getAttribute('instruction-count')) || 0;
     }
 });
 
@@ -450,14 +532,13 @@ class Tamago {
 			m.innerHTML = toHex(2, this.system._wram[i]);
 		}
 
-		for (const [i, m] of Object.entries(this.body.control)) {
+		for (const [i, m] of Object.entries(this.control.bytes)) {
 			var acc = this.system._cpuacc[i+0x3000];
 			this.system._cpuacc[i+0x3000] = 0;
 			m.classList.toggle('read', acc & ACCESS_READ);
 			m.classList.toggle('write', acc & ACCESS_WRITE);
 			m.innerHTML = toHex(2, this.system._cpureg[i]);
 		}
-
 
 		var disasm = disassemble(config.instructionCount, this._disasmOffset, this.system),
 			bias = Math.floor(config.instructionCount / 2),
@@ -491,9 +572,7 @@ class Tamago {
 			attr(row.instruction, 'port', g.port);
 		}
 
-		for (var i = disasm.length; i < config.instructionCount; i++) {
-			var row = this.body.instructions[i];
-
+		for (var row of this.body.instructions.slice(disasm.length)) {
 			row.location.innerHTML = "";
 			row.opcode.innerHTML = "";
 			row.addressing.innerHTML = "";
@@ -576,22 +655,13 @@ class Tamago {
 
 			column.appendChild(cpu);
 
-			var control = document.createElement("control");
-			for (var i = 0; i < this.system._cpureg.length; i += config.registerBytesPerLine ) {
-				var row = document.createElement("row");
-				var address = document.createElement("address");
-				address.innerText = toHex(4, i+0x3000);
-				for (var b = 0; b < config.registerBytesPerLine; b ++ ) {
-					var byte = document.createElement("byte");
-					byte.setAttribute("data-address", i+b+0x3000);
-					byte.addEventListener("click", this.update_control.bind(this));
-					address.appendChild(byte);
-				}
-				row.appendChild(address);
-				control.appendChild(row);
-			}
-
-			column.appendChild(control);
+			this.control = document.createElement("hex-dump");
+			this.control.offset = 0x3000;
+			this.control.byteLength = this.system._cpureg.length;
+			this.control.rowLength = config.registerBytesPerLine;
+			this.control.byteCallback = this.update_control.bind(this);
+			this.control.classList.add("control");
+			column.appendChild(this.control);
 		}
 
 		element.appendChild(column);
@@ -619,8 +689,7 @@ class Tamago {
 			this.memory = document.createElement("hex-dump");
 			this.memory.rowLength = config.memoryBytesPerLine;
 			this.memory.byteLength = this.system._wram.length;
-			this.memory.height = '42em';
-			this.memory.id = "memory";
+			this.memory.classList.add("memory");
 			column.appendChild(this.memory);
 			element.appendChild(column);
 		}
@@ -663,8 +732,7 @@ class Tamago {
 						data: i.querySelector("data"),
 						addressing: i.querySelector("addressing"),
 					}
-				)),
-				control: [...element.querySelectorAll("control byte")]
+				))
 			}
 
 			document.querySelector("select[action=figure]").addEventListener("change", function(e) {
