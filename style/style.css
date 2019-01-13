@@ -88,47 +88,9 @@ tamago-display {
 	padding: 10px;
 }
 
-tamago[debugger] port {
-	display: block;
+port-info {
 	height: 13em;
-	overflow: hidden;
 }
-tamago[debugger] port h1 {
-	font-size: 14px;
-	margin: 0;
-	width: 100%;
-	padding: 1ex 0 1ex;
-	font-weight: bold;
-	text-decoration: underline;
-}
-tamago[debugger] port field {
-	display: block;
-}
-tamago[debugger] port field range {
-	display: inline-block;
-	min-width: 6ex;
-}
-tamago[debugger] port field bin,
-tamago[debugger] port field hex {
-	display: inline-block;
-	padding: 0 1ex;
-}
-tamago[debugger] port field bin {
-	min-width: 8ex;
-}
-tamago[debugger] port field hex {
-	min-width: 2ex;
-}
-tamago[debugger] port field:before {
-	display: inline-block;
-	min-width: 18ex;
-	content: attr(name);
-	font-weight: bold;
-}
-tamago[debugger] port field:last-child {
-	padding-bottom: 1ex;
-}
-
 tamago[debugger] hex-dump {
 	display: block;
 	overflow-y: scroll;

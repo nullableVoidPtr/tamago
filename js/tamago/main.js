@@ -570,28 +570,67 @@ window.customElements.define('port-info', class PortInfo extends HTMLElement {
 		super();
 		this.attachShadow({mode: 'open'});
 		var style = document.createElement("style");
-		style.textContent = ``;
+		style.textContent = `
+			:host {
+				display: block;
+				overflow: hidden;
+			}
+			.header {
+				font-size: 14px;
+				margin: 0;
+				width: 100%;
+				padding: 1ex 0 1ex;
+				font-weight: bold;
+				text-decoration: underline;
+			}
+			.field:before {
+				display: inline-block;
+				min-width: 18ex;
+				content: attr(name);
+				font-weight: bold;
+			}
+			.field .range {
+				display: inline-block;
+				min-width: 6ex;
+			}
+			.field .bin {
+				min-width: 8ex;
+			}
+			.field .hex {
+				min-width: 2ex;
+			}
+			.field .bin,
+			.field .hex {
+				display: inline-block;
+				padding: 0 1ex;
+			}
+			.field:last-child {
+				padding-bottom: 1ex;
+			}
+		`;
 		this.shadowRoot.appendChild(style);
 	}
 	static get observedAttributes() {
-		return ['offset'];
+		return ['address'];
 	}
 
 	connectedCallback() {
-		if (!this.hasAttribute('offset'))
-			this.setAttribute('offset', 0x3000);
+		if (!this.hasAttribute('address'))
+			this.setAttribute('address', 0x3000);
 		this.header = document.createElement("h1");
+		this.header.classList.add("header");
 		this.shadowRoot.appendChild(this.header);
 		this.fieldList = document.createElement("div");
 		this.shadowRoot.appendChild(this.fieldList);
+		this.update();
 	}
 	
-	attributeChangedCallback(name, oldOffset, newOffset) {
-		update();
+	attributeChangedCallback() {
+		this.update();
 	}
 	
 	update() {
-		var p = ports[this.offset];
+		var p = ports[this.address];
 		if (!p) {
 			p = {
 				name: "Unknown",
@@ -603,7 +642,7 @@ window.customElements.define('port-info', class PortInfo extends HTMLElement {
 		}
 
 		p = Object.create(p);
-		p.address = this.offset.toString(16);
+		p.address = this.address.toString(16);
 
 		if (p.address.length < 2) p.address = "0" + p.address;
 
@@ -615,16 +654,20 @@ window.customElements.define('port-info', class PortInfo extends HTMLElement {
 
 		for (var f of p.fields) {
 			var field = document.createElement("div");
+			field.classList.add("field");
 			field.setAttribute("name", f.name);
 			field.setAttribute("data-start", f.start);
 			field.setAttribute("data-length", f.length);
 			var range = document.createElement("span");
+			range.classList.add("range");
 			range.innerText = `[${f.start}${(f.length > 1) ? ':' + (f.length + f.start - 1) : ""}]`;
 			field.appendChild(range);
-			field.binary = document.createElement("span");
-			field.appendChild(field.binary);
 			field.hexadecimal = document.createElement("span");
+			field.hexadecimal.classList.add("hex");
 			field.appendChild(field.hexadecimal);
+			field.binary = document.createElement("span");
+			field.binary.classList.add("bin");
+			field.appendChild(field.binary);
 			this.fieldList.appendChild(field);
 		}
 
@@ -632,7 +675,7 @@ window.customElements.define('port-info', class PortInfo extends HTMLElement {
 	}
 	
 	refresh() {
-		var d = this.system.read(this.offset, true);
+		var d = this.system.read(this.address, true);
 
 		function pad(s, l) {
 			return "00000000".substr(0, l).substr(s.length) + s;
@@ -641,19 +684,19 @@ window.customElements.define('port-info', class PortInfo extends HTMLElement {
 		for (var f of this.fieldList.children) {
 			var l = Number(f.dataset.length),
 				s = Number(f.dataset.start),
-				m = (d >> s) & ((1 << l) - 1),
+				m = (d >> s) & ((1 << l) - 1);
 
 			f.binary.innerHTML = pad(m.toString(2), l);
 			f.hexadecimal.innerHTML = pad(m.toString(16), Math.ceil(l / 4));
 		}
 	}
 	
-	set port(value) {
-		this.setAttribute('port', value);
+	set address(value) {
+		this.setAttribute('address', value);
     }
 
-	get port() {
-		return Number(this.getAttribute('port')) || 0;
+	get address() {
+		return Number(this.getAttribute('address')) || 0;
     }
 });
 
@@ -733,71 +776,6 @@ class Tamago {
 		reader.readAsArrayBuffer(binary);
 	};
 
-	update_control(e) {
-		if (e) {
-			this._debug_port = parseInt(e.target.dataset.address);
-		}
-		var port = ports[this._debug_port];
-		if (!port) {
-			port = {
-				name: "Unknown",
-				description: "",
-			}
-		}
-		if (!port.fields) {
-			port.fields = [{ name:"data", start: 0, length: 8 }];
-		}
-
-		port = Object.create(port);
-		port.address = this._debug_port.toString(16);
-
-		if (port.address.length < 2) port.address = "0" + port.address;
-
-		while (this.body.port.firstChild) {
-			this.body.port.removeChild(this.body.port.firstChild);
-		}
-
-		var header = document.createElement("h1");
-		header.innerText = `${port.name} (0x${port.address})`
-		this.body.port.appendChild(header);
-
-		for (var f of port.fields) {
-			var field = document.createElement("field");
-			field.setAttribute("name", f.name);
-			field.setAttribute("data-start", f.start);
-			field.setAttribute("data-length", f.length);
-			var range = document.createElement("range");
-			range.innerText = `[${f.start}${(f.length > 1) ? ':' + (f.length + f.start - 1) : ""}]`;
-			field.appendChild(range);
-			field.appendChild(document.createElement("hex"));
-			field.appendChild(document.createElement("bin"));
-			this.body.port.appendChild(field);
-		}
-
-		this.body.fields = this.body.port.querySelectorAll("field");
-
-		this.refresh_port();
-	}
-
-	refresh_port() {
-		var d = this.system.read(this._debug_port, true);
-
-		function pad(s, l) {
-			return "00000000".substr(0, l).substr(s.length) + s;
-		}
-
-		for (var f of this.body.fields) {
-			var l = Number(f.dataset.length),
-				s = Number(f.dataset.start),
-				m = (d >> s) & ((1 << l) - 1),
-				b = f.querySelector("bin"),
-				h = f.querySelector("hex");
-
-			b.innerHTML = pad(m.toString(2), l);
-			h.innerHTML = pad(m.toString(16), Math.ceil(l / 4));
-		}
-	}
-
 	refresh_debugger() {
 
 		// Update basic views
@@ -820,7 +798,7 @@ class Tamago {
 
 		this.disassembly.update(this.system, this._disasmOffset);
 
-		this.refresh_port();
+		this.portInfo.refresh();
 		this.refresh_simple();
 	}
 
@@ -882,7 +860,9 @@ class Tamago {
 			this.control.virtualOffset = 0x3000;
 			this.control.byteLength = this.system._cpureg.length;
 			this.control.rowLength = config.registerBytesPerLine;
-			this.control.byteCallback = this.update_control.bind(this);
+			this.control.byteCallback = function(e) {
+				this.portInfo.address = parseInt(e.target.dataset.address);
+			}.bind(this);
 			this.control.classList.add("control");
 			column.appendChild(this.control);
 		}
@@ -895,7 +875,9 @@ class Tamago {
 			element.appendChild(column);
 
 			column = document.createElement("div");
-			column.appendChild(document.createElement("port"));
+			this.portInfo = document.createElement("port-info");
+			this.portInfo.system = this.system;
+			column.appendChild(this.portInfo);
 
 			this.memory = document.createElement("hex-dump");
 			this.memory.rowLength = config.memoryBytesPerLine;
@@ -922,7 +904,6 @@ class Tamago {
 			}
 
 			this.body = {
-				port: element.querySelector("port"),
 				selects: [...element.querySelectorAll("select")].reduce((acc, s) => {
 					acc[s.attributes.action.value.toLowerCase()] = s;
 					return acc;
@@ -932,9 +913,6 @@ class Tamago {
 			document.querySelector("select[action=figure]").addEventListener("change", function(e) {
 				this.system.inserted_figure = Number(e.target.value);
 			}.bind(this));
-
-			this._debug_port = 0x3000;
-			this.update_control();
 
 			this.refresh = this.refresh_debugger;
 		} else {
