@@ -104,7 +104,7 @@ window.customElements.define('tamago-display', class TamagoDisplay extends HTMLE
 		this.shadowRoot.appendChild(style);
 		this.palette = [0xffdddddd, 0xff9e9e9e, 0xff606060, 0xff222222];
 	}
-	
+
 	connectedCallback() {
 		this.figureDiv = document.createElement("div");
 		this.figureDiv.classList.add('figure');
@@ -142,7 +142,7 @@ window.customElements.define('tamago-display', class TamagoDisplay extends HTMLE
 		}
 		this.shadowRoot.appendChild(bottomIcons);
 	}
-	
+
 	refresh(system) {
 		var a = 4, b = 0;
 
@@ -263,7 +263,7 @@ window.customElements.define('hex-dump', class HexDump extends HTMLElement {
 		this.setAttribute(name, newValue);
 		this.createTable();
 	}
-	
+
 	update(memory, access) {
 		for (var i = 0; i < this.bytes.length; i++) {
 			var cell = this.bytes[i];
@@ -356,7 +356,7 @@ window.customElements.define('disassembly-listing', class Disassembly extends HT
 				color: var(--purple);
 				width: 16ex;
 			}
-			
+
 			td:nth-child(3)[mode=absolute]:before,
 			td:nth-child(3)[mode=absoluteX]:before,
 			td:nth-child(3)[mode=absoluteY]:before,
@@ -405,6 +405,7 @@ window.customElements.define('disassembly-listing', class Disassembly extends HT
 			}
 		`;
 		this.shadowRoot.appendChild(style);
+		this.offset = 0;
 	}
 
 	connectedCallback() {
@@ -439,8 +440,20 @@ window.customElements.define('disassembly-listing', class Disassembly extends HT
 		}
 	}
 
-	update(system, offset) {
-		var disasm = disassemble(config.instructionCount, offset, system);
+	update(system) {
+		var disasm = disassemble(this.instructionCount, this.offset, system),
+			bias = Math.floor(this.instructionCount / 2),
+			current = disasm.findIndex((i) => i.active);
+
+		// PC isn't were it should be
+		if (current == -1) {
+			this.offset = this.system.pc;
+			disasm = disassemble(this.instructionCount, this.offset, system);
+		} else if (current >= bias && disasm.length == this.instructionCount) {
+			this.offset = disasm[current-bias].location;
+			disasm = disassemble(this.instructionCount, this.offset, system);
+		}
+
 		for (const [i, g] of Object.entries(disasm)) {
 			var instruction = this.instructions[i];
 			instruction.address.innerHTML = toHex(4, g.location)
@@ -491,7 +504,7 @@ window.customElements.define('cpu-info', class CPUInfo extends HTMLElement {
 				content: "Registers";
 				display: block;
 			}
-			
+
 			.register:before {
 				display: inline-block;
 				text-align: right;
@@ -553,7 +566,7 @@ window.customElements.define('cpu-info', class CPUInfo extends HTMLElement {
 		}
 		this.shadowRoot.appendChild(registerList);
 	}
-	
+
 	update(system) {
 		for (const [register, elem] of Object.entries(this.registers)){
 			elem.innerHTML = toHex(2, system[register]);
@@ -624,11 +637,11 @@ window.customElements.define('port-info', class PortInfo extends HTMLElement {
 		this.shadowRoot.appendChild(this.fieldList);
 		this.update();
 	}
-	
+
 	attributeChangedCallback() {
 		this.update();
 	}
-	
+
 	update() {
 		var p = ports[this.address];
 		if (!p) {
@@ -647,7 +660,7 @@ window.customElements.define('port-info', class PortInfo extends HTMLElement {
 		if (p.address.length < 2) p.address = "0" + p.address;
 
 		this.header.innerText = `${p.name} (0x${p.address})`
-		
+
 		while (this.fieldList.firstChild) {
 			this.fieldList.removeChild(this.fieldList.firstChild);
 		}
@@ -673,7 +686,7 @@ window.customElements.define('port-info', class PortInfo extends HTMLElement {
 
 		this.refresh();
 	}
-	
+
 	refresh() {
 		var d = this.system.read(this.address, true);
 
@@ -690,7 +703,7 @@ window.customElements.define('port-info', class PortInfo extends HTMLElement {
 			f.hexadecimal.innerHTML = pad(m.toString(16), Math.ceil(l / 4));
 		}
 	}
-	
+
 	set address(value) {
 		this.setAttribute('address', value);
     }
@@ -707,8 +720,6 @@ class Tamago {
 		this.system = new Tamagotchi(bios);
 
 		this.configure(element);
-
-		this._disasmOffset = 0;
 
 		this.refresh();
 
@@ -778,25 +789,13 @@ class Tamago {
 
 	refresh_debugger() {
 
-		// Update basic views
 		this.CPUInfo.update(this.system);
 
 		this.memory.update(this.system._wram);
-		
+
 		this.control.update(this.system._cpureg, this.system._cpuacc);
-		
-		var disasm = disassemble(config.instructionCount, this._disasmOffset, this.system),
-			bias = Math.floor(config.instructionCount / 2),
-			current = disasm.reduce(function(acc, d, i){ return d.active ? i : acc; }, null);
 
-		// PC isn't were it should be
-		if (current === null) {
-			this._disasmOffset = this.system.pc;
-		} else if (current >= bias && disasm.length == config.instructionCount) {
-			this._disasmOffset = disasm[current-bias].location;
-		}
-
-		this.disassembly.update(this.system, this._disasmOffset);
+		this.disassembly.update(this.system);
 
 		this.portInfo.refresh();
 		this.refresh_simple();
