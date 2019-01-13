@@ -1,213 +1,132 @@
 /*!
- *  Font Awesome 3.2.1
- *  the iconic font designed for Bootstrap
- *  ------------------------------------------------------------------------------
- *  The full suite of pictographic icons, examples, and documentation can be
- *  found at http://fontawesome.io.  Stay up to date on Twitter at
- *  http://twitter.com/fontawesome.
+ *	Font Awesome 3.2.1
+ *	the iconic font designed for Bootstrap
+ *	------------------------------------------------------------------------------
+ *	The full suite of pictographic icons, examples, and documentation can be
+ *	found at http://fontawesome.io.	Stay up to date on Twitter at
+ *	http://twitter.com/fontawesome.
  *
- *  License
- *  ------------------------------------------------------------------------------
- *  - The Font Awesome font is licensed under SIL OFL 1.1 -
- *    http://scripts.sil.org/OFL
- *  - Font Awesome CSS, LESS, and SASS files are licensed under MIT License -
- *    http://opensource.org/licenses/mit-license.html
- *  - Font Awesome documentation licensed under CC BY 3.0 -
- *    http://creativecommons.org/licenses/by/3.0/
- *  - Attribution is no longer required in Font Awesome 3.0, but much appreciated:
- *    "Font Awesome by Dave Gandy - http://fontawesome.io"
+ *	License
+ *	------------------------------------------------------------------------------
+ *	- The Font Awesome font is licensed under SIL OFL 1.1 -
+ *		http://scripts.sil.org/OFL
+ *	- Font Awesome CSS, LESS, and SASS files are licensed under MIT License -
+ *		http://opensource.org/licenses/mit-license.html
+ *	- Font Awesome documentation licensed under CC BY 3.0 -
+ *		http://creativecommons.org/licenses/by/3.0/
+ *	- Attribution is no longer required in Font Awesome 3.0, but much appreciated:
+ *		"Font Awesome by Dave Gandy - http://fontawesome.io"
  *
- *  Author - Dave Gandy
- *  ------------------------------------------------------------------------------
- *  Email: dave--fontawesome.io
- *  Twitter: http://twitter.com/davegandy
- *  Work: Lead Product Designer -- Kyruus - http://kyruus.com
+ *	Author - Dave Gandy
+ *	------------------------------------------------------------------------------
+ *	Email: dave--fontawesome.io
+ *	Twitter: http://twitter.com/davegandy
+ *	Work: Lead Product Designer -- Kyruus - http://kyruus.com
  */
 /* FONT PATH
  * -------------------------- */
 @font-face {
-  font-family: 'FontAwesome';
-  src: url('../font/fontawesome-webfont.eot?v=3.2.1');
-  src: url('../font/fontawesome-webfont.eot?#iefix&v=3.2.1') format('embedded-opentype'), url('../font/fontawesome-webfont.woff?v=3.2.1') format('woff'), url('../font/fontawesome-webfont.ttf?v=3.2.1') format('truetype'), url('../font/fontawesome-webfont.svg#fontawesomeregular?v=3.2.1') format('svg');
-  font-weight: normal;
-  font-style: normal;
+	font-family: 'FontAwesome';
+	src: url('../font/fontawesome-webfont.eot?v=3.2.1');
+	src: url('../font/fontawesome-webfont.eot?#iefix&v=3.2.1') format('embedded-opentype'), url('../font/fontawesome-webfont.woff?v=3.2.1') format('woff'), url('../font/fontawesome-webfont.ttf?v=3.2.1') format('truetype'), url('../font/fontawesome-webfont.svg#fontawesomeregular?v=3.2.1') format('svg');
+	font-weight: normal;
+	font-style: normal;
 }
 
 :root {
-  --pink: #faf;
-  
-  --blue: #6FCDE3;
-  --blue-2: #5DBCD0;
-  
-  --blue-green: #4FAFAF;
-  --blue-green-2: #3E8887;
-  
-  --green: #46B986;
-  --green-2: #21A671;
-  
-  --light-grey: #EEF3F4;
-  --light-grey-2: #C1C7C9;
-  
-  --grey: #BCC3C6;
-  --grey-2: #9BA1A3;
-  
-  --dark-grey: #3D3D3D;
-  --dark-grey-2: #333333;
-  
-  --yellow: #F6C439;
-  --yellow-2: #DAAF38;
-  
-  --orange: #EE8633;
-  --orange-2: #CE7333;
-  
-  --bright-orange: #F06B2F;
-  --bright-orange-2: #E06130;
-  
-  --red: #EE5358;
-  --red-2: #D44A4D;
-  
-  --purple: #C15EA2;
-  --purple-2: #A5498E;
-  
-  --dark-purple: #55365E;
-  --dark-purple-2: #4A2F4F;
-  font-family: monospace;
-  font-size: 14px;
+	--pink: #faf;
+	
+	--blue: #6FCDE3;
+	--blue-2: #5DBCD0;
+	
+	--blue-green: #4FAFAF;
+	--blue-green-2: #3E8887;
+	
+	--green: #46B986;
+	--green-2: #21A671;
+	
+	--light-grey: #EEF3F4;
+	--light-grey-2: #C1C7C9;
+	
+	--grey: #BCC3C6;
+	--grey-2: #9BA1A3;
+	
+	--dark-grey: #3D3D3D;
+	--dark-grey-2: #333333;
+	
+	--yellow: #F6C439;
+	--yellow-2: #DAAF38;
+	
+	--orange: #EE8633;
+	--orange-2: #CE7333;
+	
+	--bright-orange: #F06B2F;
+	--bright-orange-2: #E06130;
+	
+	--red: #EE5358;
+	--red-2: #D44A4D;
+	
+	--purple: #C15EA2;
+	--purple-2: #A5498E;
+	
+	--dark-purple: #55365E;
+	--dark-purple-2: #4A2F4F;
+	font-family: monospace;
+	line-height: 1em;
 }
 
 body {
-  background: white;
+	background: white;
 }
 tamago[debugger] {
-  display: flex;
-  justify-content: space-evenly;
-  position: relative;
-  color: black;
-}
-tamago[debugger] buttons {
-  display: flex;
-  justify-content: space-evenly;
-}
-tamago[debugger] display {
-  text-align: center;
-  display: block;
-  padding: 10px;
-}
-tamago[debugger] display figure {
-  font-weight: bold;
-  padding: 0;
-  margin: 0;
-}
-tamago[debugger] display canvas {
-  border: 2px solid var(--pink);
-  display: inline-block;
-  background: var(--light-grey);
-  width: 192px;
-  height: 124px;
-}
-tamago[debugger] cpu {
-  display: block;
-}
-tamago[debugger] cpu registers {
-  width: 28ex;
-  display: block;
-  padding: 10px;
-}
-tamago[debugger] cpu registers:before {
-  content: "Registers";
-  display: block;
-}
-tamago[debugger] cpu registers register {
-  display: inline-block;
-}
-tamago[debugger] cpu registers register:before {
-  display: inline-block;
-  text-align: right;
-  content: attr(name);
-  width: 32px;
-  padding: 2px 10px;
-}
-tamago[debugger] cpu flags {
-  display: block;
-  padding: 10px;
-  text-align: center;
-}
-tamago[debugger] cpu flags:before {
-  content: "Flags";
-  display: block;
-}
-tamago[debugger] cpu flags flag {
-  display: inline-block;
-  position: relative;
-  min-width: 16px;
-  padding: 2px;
-}
-tamago[debugger] cpu flags flag:after {
-  font-family: FontAwesome;
-  font-weight: normal;
-  font-style: normal;
-  text-decoration: inherit;
-  -webkit-font-smoothing: antialiased;
-  *margin-right: .3em;
-  content: "\2610";
-  display: block;
-}
-tamago[debugger] cpu flags flag.active:after {
-  content: "\2611";
-}
-tamago[debugger] cpu flags flag:before {
-  text-align: center;
-  content: attr(name);
-  display: block;
+	display: flex;
+	justify-content: space-evenly;
+	position: relative;
+	color: black;
 }
 tamago[debugger] port {
-  display: block;
-  height: 13em;
-  overflow: hidden;
+	display: block;
+	height: 13em;
+	overflow: hidden;
 }
 tamago[debugger] port h1 {
-  font-size: 14px;
-  margin: 0;
-  width: 100%;
-  padding: 1ex 0 1ex;
-  font-weight: bold;
-  text-decoration: underline;
+	font-size: 14px;
+	margin: 0;
+	width: 100%;
+	padding: 1ex 0 1ex;
+	font-weight: bold;
+	text-decoration: underline;
 }
 tamago[debugger] port field {
-  display: block;
+	display: block;
 }
 tamago[debugger] port field range {
-  display: inline-block;
-  min-width: 6ex;
+	display: inline-block;
+	min-width: 6ex;
 }
 tamago[debugger] port field bin,
 tamago[debugger] port field hex {
-  display: inline-block;
-  padding: 0 1ex;
+	display: inline-block;
+	padding: 0 1ex;
 }
 tamago[debugger] port field bin {
-  min-width: 8ex;
+	min-width: 8ex;
 }
 tamago[debugger] port field hex {
-  min-width: 2ex;
+	min-width: 2ex;
 }
 tamago[debugger] port field:before {
-  display: inline-block;
-  min-width: 18ex;
-  content: attr(name);
-  font-weight: bold;
+	display: inline-block;
+	min-width: 18ex;
+	content: attr(name);
+	font-weight: bold;
 }
 tamago[debugger] port field:last-child {
-  padding-bottom: 1ex;
-}
-
-tamago[debugger] hex-dump {
-	display: block;
-	overflow-y: scroll;
+	padding-bottom: 1ex;
 }
 .memory {
-  height: 42em;
+	height: 42em;
 }
 .control {
-  height: 24em;
+	height: 24em;
 }

@@ -215,28 +215,39 @@ window.customElements.define('hex-dump', class HexDump extends HTMLElement {
 		}
 		var table = document.createElement("table");
 		this.shadowRoot.appendChild(table);
-		var i = 0;
-		while (i < this.byteLength) {
+		for (var i = 0; i < this.byteLength; i++) {
 			if (i % this.rowLength == 0) {
 				var row = document.createElement("tr");
 				var offset = document.createElement("th");
-				offset.innerText = toHex(4, this.offset + i);
+				offset.innerText = toHex(4, this.virtualOffset + i);
 				row.appendChild(offset);
 				table.appendChild(row);
 			}
 			var cell = document.createElement("td");
 			cell.innerText = "00";
 			cell.addEventListener("click", this.onByteClick.bind(this));
-			cell.setAttribute("data-address", this.offset + i);
+			cell.setAttribute("data-address", this.virtualOffset + i);
 			row.appendChild(cell);
 			this.bytes.push(cell);
-			i++;
 		}
 	}
 
 	attributeChangedCallback(name, oldValue, newValue) {
 		this.setAttribute(name, newValue);
 		this.createTable();
+	}
+	
+	update(memory, access) {
+		for (var i = 0; i < this.bytes.length; i++) {
+			var cell = this.bytes[i];
+			if (access) {
+				var acc = access[i+this.virtualOffset];
+				access[i+this.virtualOffset] = 0;
+				cell.classList.toggle('read', acc & ACCESS_READ);
+				cell.classList.toggle('write', acc & ACCESS_WRITE);
+			}
+			cell.innerHTML = toHex(2, memory[i]);
+		}
 	}
 
 	onByteClick(e) {
@@ -261,12 +272,12 @@ window.customElements.define('hex-dump', class HexDump extends HTMLElement {
 		return Number(this.getAttribute('row-length'));
     }
 
-	set offset(value) {
-		this.setAttribute('offset', value);
+	set virtualOffset(value) {
+		this.setAttribute('virtual-offset', value);
     }
 
-	get offset() {
-		return Number(this.getAttribute('offset')) || 0;
+	get virtualOffset() {
+		return Number(this.getAttribute('virtual-offset')) || 0;
     }
 });
 
@@ -318,7 +329,6 @@ window.customElements.define('disassembly-listing', class Disassembly extends HT
 				color: var(--purple);
 				width: 16ex;
 			}
-
 			
 			td:nth-child(3)[mode=absolute]:before,
 			td:nth-child(3)[mode=absoluteX]:before,
@@ -383,23 +393,6 @@ window.customElements.define('disassembly-listing', class Disassembly extends HT
 		}
 		var table = document.createElement("table");
 		this.shadowRoot.appendChild(table);
-		var colgroup = document.createElement("colgroup");
-		table.appendChild(colgroup);
-		var addressCol = document.createElement("col");
-		addressCol.style = "";
-		colgroup.appendChild(addressCol);
-		var opcodeCol = document.createElement("col");
-		opcodeCol.style = "";
-		colgroup.appendChild(opcodeCol);
-		var operandCol = document.createElement("col");
-		operandCol.style = "";
-		colgroup.appendChild(operandCol);
-		var hexCol = document.createElement("col");
-		hexCol.style = "";
-		colgroup.appendChild(hexCol);
-		var commentCol = document.createElement("col");
-		commentCol.style = "";
-		colgroup.appendChild(commentCol);
 
 		this.instructions = [];
 		for (var i = 0; i < this.instructionCount; i++ ) {
@@ -454,6 +447,95 @@ window.customElements.define('disassembly-listing', class Disassembly extends HT
 	get instructionCount() {
 		return Number(this.getAttribute('instruction-count')) || 0;
     }
+});
+
+window.customElements.define('cpu-info', class CPUInfo extends HTMLElement {
+	constructor() {
+		super();
+		this.attachShadow({mode: 'open'});
+		var style = document.createElement("style");
+		style.textContent = `
+			.registers {
+				width: 28ex;
+				padding: 10px;
+			}
+
+			.registers:before {
+				content: "Registers";
+				display: block;
+			}
+			
+			.register:before {
+				display: inline-block;
+				text-align: right;
+				content: attr(name);
+				width: 32px;
+				padding: 2px 10px;
+			}
+
+			.flags {
+				padding: 10px;
+				text-align: center;
+			}
+
+			.flags:before {
+				content: "Flags";
+				display: block;
+			}
+
+			.flag {
+				display: inline-block;
+				position: relative;
+				min-width: 16px;
+				padding: 2px;
+			}
+
+			.flag:before {
+				text-align: center;
+				content: attr(name);
+				display: block;
+			}
+		`;
+		this.shadowRoot.appendChild(style);
+	}
+
+	connectedCallback() {
+		this.flags = {};
+		var flagList = document.createElement("div");
+		flagList.classList.add("flags");
+		for (var f of ["C", "Z", "I", "D", "V", "N"]) {
+			var container = document.createElement("span");
+			this.flags[f.toLowerCase()] = document.createElement("input");
+			container.appendChild(this.flags[f.toLowerCase()])
+			this.flags[f.toLowerCase()].type = "checkbox";
+			this.flags[f.toLowerCase()].disabled = true;
+			container.classList.add("flag");
+			container.setAttribute("name", f);
+			flagList.appendChild(container);
+		}
+		this.shadowRoot.appendChild(flagList);
+
+		this.registers = {};
+		var registerList = document.createElement("div");
+		registerList.classList.add("registers");
+		for (var r of ["A", "X", "Y", "S", "PC"]) {
+			this.registers[r.toLowerCase()] = document.createElement("span");
+			this.registers[r.toLowerCase()].setAttribute("name", r);
+			this.registers[r.toLowerCase()].classList.add("register")
+			registerList.appendChild(this.registers[r.toLowerCase()]);
+		}
+		this.shadowRoot.appendChild(registerList);
+	}
+	
+	update(system) {
+		for (const [register, elem] of Object.entries(this.registers)){
+			elem.innerHTML = toHex(2, system[register]);
+		}
+
+		for (const [flag, elem] of Object.entries(this.flags)) {
+			elem.checked = Boolean(system[flag]);
+		}
+	}
 });
 
 class Tamago {
@@ -559,7 +641,6 @@ class Tamago {
 		if (e) {
 			this._debug_port = parseInt(e.target.dataset.address);
 		}
-
 		var port = ports[this._debug_port];
 		if (!port) {
 			port = {
@@ -624,26 +705,12 @@ class Tamago {
 	refresh_debugger() {
 
 		// Update basic views
-		for (const [register, elem] of Object.entries(this.body.registers)){
-			elem.innerHTML = toHex(2, this.system[register]);
-		}
+		this.CPUInfo.update(this.system);
 
-		for (const [flag, elem] of Object.entries(this.body.flags)) {
-			elem.classList.toggle("active", Boolean(this.system[flag]));
-		}
-
-		for (const [i, m] of Object.entries(this.memory.bytes)) {
-			m.innerHTML = toHex(2, this.system._wram[i]);
-		}
-
-		for (const [i, m] of Object.entries(this.control.bytes)) {
-			var acc = this.system._cpuacc[i+0x3000];
-			this.system._cpuacc[i+0x3000] = 0;
-			m.classList.toggle('read', acc & ACCESS_READ);
-			m.classList.toggle('write', acc & ACCESS_WRITE);
-			m.innerHTML = toHex(2, this.system._cpureg[i]);
-		}
-
+		this.memory.update(this.system._wram);
+		
+		this.control.update(this.system._cpureg, this.system._cpuacc);
+		
 		var disasm = disassemble(config.instructionCount, this._disasmOffset, this.system),
 			bias = Math.floor(config.instructionCount / 2),
 			current = disasm.reduce(function(acc, d, i){ return d.active ? i : acc; }, null);
@@ -712,28 +779,11 @@ class Tamago {
 
 			column.appendChild(irqForm);
 
-			var cpu = document.createElement("cpu");
-
-			var flags = document.createElement("flags");
-			for (var name of ["C", "Z", "I", "D", "V", "N"]) {
-				var flag = document.createElement("flag");
-				flag.setAttribute("name", name);
-				flags.appendChild(flag);
-			}
-			cpu.appendChild(flags);
-
-			var registers = document.createElement("registers");
-			for (var name of ["A", "X", "Y", "S", "PC"]) {
-				var register = document.createElement("register");
-				register.setAttribute("name", name);
-				registers.appendChild(register);
-			}
-			cpu.appendChild(registers);
-
-			column.appendChild(cpu);
+			this.CPUInfo = document.createElement("cpu-info");
+			column.appendChild(this.CPUInfo);
 
 			this.control = document.createElement("hex-dump");
-			this.control.offset = 0x3000;
+			this.control.virtualOffset = 0x3000;
 			this.control.byteLength = this.system._cpureg.length;
 			this.control.rowLength = config.registerBytesPerLine;
 			this.control.byteCallback = this.update_control.bind(this);
@@ -780,20 +830,12 @@ class Tamago {
 				selects: [...element.querySelectorAll("select")].reduce((acc, s) => {
 					acc[s.attributes.action.value.toLowerCase()] = s;
 					return acc;
-				}, {}),
-				flags: [...element.querySelectorAll("flag")].reduce((acc, f) => {
-					acc[f.attributes.name.value.toLowerCase()] = f;
-					return acc;
-				}, {}),
-				registers: [...element.querySelectorAll("register")].reduce((acc, r) => {
-					acc[r.attributes.name.value.toLowerCase()] = r;
-					return acc;
 				}, {})
 			}
 
 			document.querySelector("select[action=figure]").addEventListener("change", function(e) {
 				this.system.inserted_figure = Number(e.target.value);
-			});
+			}.bind(this));
 
 			this._debug_port = 0x3000;
 			this.update_control();
