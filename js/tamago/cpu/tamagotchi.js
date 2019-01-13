@@ -40,7 +40,6 @@ export default class Tamagotchi extends r6502 {
 		this.inserted_figure = 0;
 
 		this._tbh_timer = 0; 	// HACK
-		this.PALETTE = [0xffdddddd, 0xff9e9e9e, 0xff606060, 0xff222222];
 
 		this.CLOCK_RATE = 4000000; // 4MHz
 		this.MAX_ADVANCE = 1;

@@ -32,8 +32,9 @@ window.customElements.define('tamago-display', class TamagoDisplay extends HTMLE
 		 *
 		 */
 		style.textContent = `
-			* {
+			:host {
 				text-align: center;
+				display: block;
 			}
 
 			[class^="icon-"],
@@ -101,7 +102,10 @@ window.customElements.define('tamago-display', class TamagoDisplay extends HTMLE
 			}
 		`;
 		this.shadowRoot.appendChild(style);
-
+		this.palette = [0xffdddddd, 0xff9e9e9e, 0xff606060, 0xff222222];
+	}
+	
+	connectedCallback() {
 		this.figureDiv = document.createElement("div");
 		this.figureDiv.classList.add('figure');
 		this.shadowRoot.appendChild(this.figureDiv);
@@ -138,8 +142,31 @@ window.customElements.define('tamago-display', class TamagoDisplay extends HTMLE
 		}
 		this.shadowRoot.appendChild(bottomIcons);
 	}
+	
+	refresh(system) {
+		var a = 4, b = 0;
 
-	refresh() {
+		for (var g of this.glyphs) {
+			var glyph = (system._dram[a] >> b) & 3;
+			if ((b -= 2) < 0) { b = 6; a++; }
+
+			g.style.color = "#" + (this.palette[glyph] & 0xFFFFFF).toString(16);
+		}
+
+		var px = 0;
+		for (var y = 0; y < 31; y++) {
+			var a = system.LCD_ORDER[y];
+
+			for (var x = 0; x < 64; x += 4) {
+				var d = system._dram[a++], b = 6;
+
+				while (b >= 0) {
+					this.pixels[px++] = this.palette[(d >> b) & 3];
+					b -= 2;
+				}
+			}
+		}
+
 		this.canvasContext.putImageData(this.pixelBuffer, 0, 0);
 	}
 
@@ -538,6 +565,98 @@ window.customElements.define('cpu-info', class CPUInfo extends HTMLElement {
 	}
 });
 
+window.customElements.define('port-info', class PortInfo extends HTMLElement {
+	constructor() {
+		super();
+		this.attachShadow({mode: 'open'});
+		var style = document.createElement("style");
+		style.textContent = ``;
+		this.shadowRoot.appendChild(style);
+	}
+	static get observedAttributes() {
+		return ['offset'];
+	}
+
+	connectedCallback() {
+		if (!this.hasAttribute('offset'))
+			this.setAttribute('offset', 0x3000);
+		this.header = document.createElement("h1");
+		this.shadowRoot.appendChild(this.header);
+		this.fieldList = document.createElement("div");
+		this.shadowRoot.appendChild(this.fieldList);
+	}
+	
+	attributeChangedCallback(name, oldOffset, newOffset) {
+		update();
+	}
+	
+	update() {
+		var p = ports[this.offset];
+		if (!p) {
+			p = {
+				name: "Unknown",
+				description: "",
+			}
+		}
+		if (!p.fields) {
+			p.fields = [{ name:"data", start: 0, length: 8 }];
+		}
+
+		p = Object.create(p);
+		p.address = this.offset.toString(16);
+
+		if (p.address.length < 2) p.address = "0" + p.address;
+
+		this.header.innerText = `${p.name} (0x${p.address})`
+		
+		while (this.fieldList.firstChild) {
+			this.fieldList.removeChild(this.fieldList.firstChild);
+		}
+
+		for (var f of p.fields) {
+			var field = document.createElement("div");
+			field.setAttribute("name", f.name);
+			field.setAttribute("data-start", f.start);
+			field.setAttribute("data-length", f.length);
+			var range = document.createElement("span");
+			range.innerText = `[${f.start}${(f.length > 1) ? ':' + (f.length + f.start - 1) : ""}]`;
+			field.appendChild(range);
+			field.binary = document.createElement("span");
+			field.appendChild(field.binary);
+			field.hexadecimal = document.createElement("span");
+			field.appendChild(field.hexadecimal);
+			this.fieldList.appendChild(field);
+		}
+
+		this.refresh();
+	}
+	
+	refresh() {
+		var d = this.system.read(this.offset, true);
+
+		function pad(s, l) {
+			return "00000000".substr(0, l).substr(s.length) + s;
+		}
+
+		for (var f of this.fieldList.children) {
+			var l = Number(f.dataset.length),
+				s = Number(f.dataset.start),
+				m = (d >> s) & ((1 << l) - 1),
+
+			f.binary.innerHTML = pad(m.toString(2), l);
+			f.hexadecimal.innerHTML = pad(m.toString(16), Math.ceil(l / 4));
+		}
+	}
+	
+	set port(value) {
+		this.setAttribute('port', value);
+    }
+
+	get port() {
+		return Number(this.getAttribute('port')) || 0;
+    }
+});
+
 class Tamago {
 	constructor(element, bios) {
 		var that = this;
@@ -594,30 +713,7 @@ class Tamago {
 	}
 
 	refresh_simple() {
-		var a = 4, b = 0, g = 0;
-
-		while (g < 10) {
-			var glyph = (this.system._dram[a] >> b) & 3;
-			if ((b -= 2) < 0) { b = 6; a++; }
-
-			this.display.glyphs[g++].style.color = "#" + (this.system.PALETTE[glyph] & 0xFFFFFF).toString(16);
-		}
-
-		var px = 0;
-		for (var y = 0; y < 31; y++) {
-			var a = this.system.LCD_ORDER[y];
-
-			for (var x = 0; x < 64; x += 4) {
-				var d = this.system._dram[a++], b = 6;
-
-				while (b >= 0) {
-					this.display.pixels[px++] = this.system.PALETTE[(d >> b) & 3];
-					b -= 2;
-				}
-			}
-		}
-
-		this.display.refresh();
+		this.display.refresh(this.system);
 	}
 
 	drop(evt) {

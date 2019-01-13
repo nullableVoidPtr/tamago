@@ -74,16 +74,20 @@
 	font-family: monospace;
 	line-height: 1em;
 }
-
-body {
-	background: white;
-}
 tamago[debugger] {
 	display: flex;
 	justify-content: space-evenly;
 	position: relative;
 	color: black;
 }
+tamago[debugger] buttons {
+	display: flex;
+	justify-content: space-evenly;
+}
+tamago-display {
+	padding: 10px;
+}
+
 tamago[debugger] port {
 	display: block;
 	height: 13em;
@@ -124,6 +128,12 @@ tamago[debugger] port field:before {
 tamago[debugger] port field:last-child {
 	padding-bottom: 1ex;
 }
+
+tamago[debugger] hex-dump {
+	display: block;
+	overflow-y: scroll;
+}
+
 .memory {
 	height: 42em;
 }
