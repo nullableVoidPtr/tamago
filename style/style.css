@@ -80,7 +80,7 @@ tamago[debugger] {
 	position: relative;
 	color: black;
 }
-tamago[debugger] buttons {
+tamago[debugger] .buttons {
 	display: flex;
 	justify-content: space-evenly;
 }

@@ -29,11 +29,6 @@ class Tamago {
 		this.refresh();
 	}
 
-	irq(e) {
-		this.system.fire_irq(parseInt(this.body.selects.irq.value,10));
-		this.refresh();
-	}
-
 	nmi(e) {
 		this.system.fire_nmi(6);
 		this.refresh();
@@ -49,7 +44,7 @@ class Tamago {
 			requestAnimationFrame(frame);
 		}
 
-		this.running = !this.running;
+		document.querySelector("input[type=button][value=step]").disabled = this.running = !this.running;
 		frame();
 
 		if (e) { e.target.attributes.value.value = this.running ? "stop" : "run"; }
@@ -105,43 +100,53 @@ class Tamago {
 		column.appendChild(this.display);
 
 		if (debug) {
-			var debuggerButtons = document.createElement("buttons");
-			for (var debugAction of ["step", "run", "reset", "nmi"]) {
+			var debuggerButtons = document.createElement("div");
+			debuggerButtons.classList.add("buttons");
+			for (var action of [
+				this.step,
+				this.run,
+				this.reset,
+				this.nmi,
+			]) {
 				var button = document.createElement("input");
 				button.type = "button";
-				button.value = debugAction;
-				button.setAttribute("action", debugAction);
+				button.value = action.name;
+				button.addEventListener("click", action.bind(this))
 				debuggerButtons.appendChild(button);
 			}
 
 			column.appendChild(debuggerButtons);
 
 			var irqForm = document.createElement("buttons");
-
+			irqForm.classList.add("buttons");
 			var figureSelect = document.createElement("select");
-			figureSelect.setAttribute("action", "figure");
 			for (const [value, text] of Object.entries(["No Figure", "Fig1", "Fig2", "Fig3"])) {
 				var option = document.createElement("option");
 				option.value = value;
 				option.innerText = text;
 				figureSelect.appendChild(option);
 			}
+			figureSelect.addEventListener("change", function(e) {
+				this.system.inserted_figure = Number(e.target.value);
+			}.bind(this));
 			irqForm.appendChild(figureSelect)
 
-			var irqSelect = document.createElement("select");
-			irqSelect.setAttribute("action", "irq");
+			this.selectedIrq = document.createElement("select");
 			for (const [value, text] of Object.entries(["TIM0",,, "2048", "8192", "SPU", "FPI", "FP",,, "TIM1", "TBH", "TBL"])) {
 				var option = document.createElement("option");
 				option.value = value;
 				option.innerText = `${value}: ${text}`;
-				irqSelect.appendChild(option);
+				this.selectedIrq.appendChild(option);
 			}
-			irqForm.appendChild(irqSelect);
+			irqForm.appendChild(this.selectedIrq);
 
 			var irqButton = document.createElement("input");
 			irqButton.type = "button";
 			irqButton.value = "irq";
-			irqButton.setAttribute("action", "irq");
+			irqButton.addEventListener("click", function (e) {
+				this.system.fire_irq(parseInt(this.selectedIrq.value,10));
+				this.refresh();
+			}.bind(this));
 			irqForm.appendChild(irqButton);
 
 			column.appendChild(irqForm);
@@ -191,21 +196,6 @@ class Tamago {
 
 		// Bind to HTML
 		if (debug) {
-			for (var el of document.querySelectorAll("input[type=button]")) {
-				el.addEventListener("click", this[el.attributes.action.value].bind(this))
-			}
-
-			this.body = {
-				selects: [...element.querySelectorAll("select")].reduce((acc, s) => {
-					acc[s.attributes.action.value.toLowerCase()] = s;
-					return acc;
-				}, {})
-			}
-
-			document.querySelector("select[action=figure]").addEventListener("change", function(e) {
-				this.system.inserted_figure = Number(e.target.value);
-			}.bind(this));
-
 			this.refresh = this.refresh_debugger;
 		} else {
 			this.refresh = this.refresh_simple;
