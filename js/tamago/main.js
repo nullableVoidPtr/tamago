@@ -7,21 +7,68 @@ import "./disassembly.js";
 import "./cpuinfo.js";
 import "./portinfo.js";
 
-class Tamago {
-	constructor(element, bios) {
-		var that = this;
-
-		this.system = new Tamagotchi(bios);
-
-		this.configure(element);
-
-		this.refresh();
-
+window.customElements.define('tamago-main', class extends HTMLElement {
+	constructor() {
+		super();
+		this.attachShadow({ mode: 'open' });
 		this.mapping = { 65: 1, 83: 2, 68: 4, 82: 8 };
 
-		document.addEventListener("keydown", e => that.system.keys &= ~that.mapping[e.keyCode] || 0xFF);
+		document.addEventListener("keydown", e => this.system.keys &= ~this.mapping[e.keyCode] || 0xFF);
+		document.addEventListener("keyup", e => this.system.keys |= this.mapping[e.keyCode] || 0);
+		var style = document.createElement("style");
+		style.textContent = `
+			:host {
+				display: flex;
+				justify-content: space-evenly;
+				position: relative;
+				color: black;
+			}
 
-		document.addEventListener("keyup", e => that.system.keys |= that.mapping[e.keyCode] || 0);
+			.buttons {
+				display: flex;
+				justify-content: space-evenly;
+			}
+
+			tamago-display {
+				padding: 10px;
+			}
+			
+			port-info {
+				height: 13em;
+			}
+
+			hex-dump {
+				display: block;
+				overflow-y: scroll;
+			}
+
+			.memory {
+				height: 42em;
+			}
+
+			.control {
+				height: 24em;
+			}
+		`;
+		this.shadowRoot.appendChild(style);
+	}
+	
+	connectedCallback() {
+		fetch(this.getAttribute("bios")).then(
+			response => response.arrayBuffer()
+		).then(
+			bios => this.init(bios)
+		).catch(
+			err => console.error(err.message, err)
+		)
+	}
+	
+	init(bios) {
+		this.system = new Tamagotchi(bios);
+
+		this.configure();
+
+		this.refresh();
 	}
 
 	step(e) {
@@ -44,7 +91,7 @@ class Tamago {
 			requestAnimationFrame(frame);
 		}
 
-		document.querySelector("input[type=button][value=step]").disabled = this.running = !this.running;
+		this.shadowRoot.querySelector("input[type=button][value=step]").disabled = this.running = !this.running;
 		frame();
 
 		if (e) { e.target.attributes.value.value = this.running ? "stop" : "run"; }
@@ -90,16 +137,12 @@ class Tamago {
 		this.refresh_simple();
 	}
 
-	configure(element) {
-
-		var debug = Boolean(element.attributes.debugger);
-
+	configure() {
 		var column = document.createElement("div");
 		this.display = document.createElement("tamago-display");
 
 		column.appendChild(this.display);
-
-		if (debug) {
+		if (this.debug) {
 			var debuggerButtons = document.createElement("div");
 			debuggerButtons.classList.add("buttons");
 			for (var action of [
@@ -126,9 +169,7 @@ class Tamago {
 				option.innerText = text;
 				figureSelect.appendChild(option);
 			}
-			figureSelect.addEventListener("change", function(e) {
-				this.system.inserted_figure = Number(e.target.value);
-			}.bind(this));
+			figureSelect.addEventListener("change", e => this.system.inserted_figure = Number(e.target.value));
 			irqForm.appendChild(figureSelect)
 
 			this.selectedIrq = document.createElement("select");
@@ -143,10 +184,10 @@ class Tamago {
 			var irqButton = document.createElement("input");
 			irqButton.type = "button";
 			irqButton.value = "irq";
-			irqButton.addEventListener("click", function (e) {
+			irqButton.addEventListener("click", e => {
 				this.system.fire_irq(parseInt(this.selectedIrq.value,10));
 				this.refresh();
-			}.bind(this));
+			});
 			irqForm.appendChild(irqButton);
 
 			column.appendChild(irqForm);
@@ -158,19 +199,17 @@ class Tamago {
 			this.control.virtualOffset = 0x3000;
 			this.control.byteLength = this.system._cpureg.length;
 			this.control.rowLength = 8;
-			this.control.byteCallback = function(e) {
-				this.portInfo.address = parseInt(e.target.dataset.address);
-			}.bind(this);
+			this.control.byteCallback = e => this.portInfo.address = parseInt(e.target.dataset.address);
 			this.control.classList.add("control");
 			column.appendChild(this.control);
 		}
-
-		element.appendChild(column);
-		if (debug) {
+		
+		this.shadowRoot.appendChild(column);
+		if (this.debug) {
 			column = document.createElement("div");
 			this.disassembly = document.createElement("disassembly-listing");
 			column.appendChild(this.disassembly);
-			element.appendChild(column);
+			this.shadowRoot.appendChild(column);
 
 			column = document.createElement("div");
 			this.portInfo = document.createElement("port-info");
@@ -181,7 +220,7 @@ class Tamago {
 			this.memory.byteLength = this.system._wram.length;
 			this.memory.classList.add("memory");
 			column.appendChild(this.memory);
-			element.appendChild(column);
+			this.shadowRoot.appendChild(column);
 		}
 
 		function noopHandler(evt) {
@@ -189,29 +228,28 @@ class Tamago {
 			evt.preventDefault();
 		}
 
-		element.addEventListener("dragenter", noopHandler, false);
-		element.addEventListener("dragexit", noopHandler, false);
-		element.addEventListener("dragover", noopHandler, false);
-		element.addEventListener("drop", this.drop.bind(this), false);
+		this.shadowRoot.addEventListener("dragenter", noopHandler, false);
+		this.shadowRoot.addEventListener("dragexit", noopHandler, false);
+		this.shadowRoot.addEventListener("dragover", noopHandler, false);
+		this.shadowRoot.addEventListener("drop", this.drop.bind(this), false);
 
-		// Bind to HTML
-		if (debug) {
+		if (this.debug) {
 			this.refresh = this.refresh_debugger;
 		} else {
 			this.refresh = this.refresh_simple;
 			// Start running soon
 			setTimeout(function() { this.run(); }, 10);
 		}
-	};
-}
+	}
+	
+	set debug(value) {
+		if (Boolean(value))
+			this.setAttribute('debug', '');
+		else
+			this.removeAttribute('debug');
+	}
 
-fetch("files/tamago.bin").then(response => {
-	if (!response.ok) {
-		throw new Error("HTTP error, status = " + response.status);
-	}
-	return response.arrayBuffer();
-}).then(bios => {
-	for (var elem of document.querySelectorAll("tamago")) {
-		new Tamago(elem, bios);
-	}
+    get debug() {
+      return this.hasAttribute('debug');
+    }
 });

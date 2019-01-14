@@ -2,6 +2,10 @@ import paddedEncode from "./encode.js";
 import ports from "./data/ports.js";
 
 window.customElements.define('port-info', class extends HTMLElement {
+	static get observedAttributes() {
+		return ['address'];
+	}
+
 	constructor() {
 		super();
 		this.attachShadow({mode: 'open'});
@@ -45,9 +49,6 @@ window.customElements.define('port-info', class extends HTMLElement {
 			}
 		`;
 		this.shadowRoot.appendChild(style);
-	}
-	static get observedAttributes() {
-		return ['address'];
 	}
 
 	connectedCallback() {

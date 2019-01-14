@@ -74,31 +74,3 @@
 	font-family: monospace;
 	line-height: 1em;
 }
-tamago[debugger] {
-	display: flex;
-	justify-content: space-evenly;
-	position: relative;
-	color: black;
-}
-tamago[debugger] .buttons {
-	display: flex;
-	justify-content: space-evenly;
-}
-tamago-display {
-	padding: 10px;
-}
-
-port-info {
-	height: 13em;
-}
-tamago[debugger] hex-dump {
-	display: block;
-	overflow-y: scroll;
-}
-
-.memory {
-	height: 42em;
-}
-.control {
-	height: 24em;
-}
