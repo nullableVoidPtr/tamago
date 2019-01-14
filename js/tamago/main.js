@@ -652,9 +652,7 @@ window.customElements.define('port-info', class PortInfo extends HTMLElement {
 		}
 
 		p = Object.create(p);
-		p.address = this.address.toString(16);
-
-		if (p.address.length < 2) p.address = "0" + p.address;
+		p.address = paddedEncode(this.address, 2);
 
 		this.header.innerText = `${p.name} (0x${p.address})`
 
@@ -687,17 +685,13 @@ window.customElements.define('port-info', class PortInfo extends HTMLElement {
 	refresh() {
 		var d = this.system.read(this.address, true);
 
-		function pad(s, l) {
-			return "00000000".substr(0, l).substr(s.length) + s;
-		}
-
 		for (var f of this.fieldList.children) {
 			var l = Number(f.dataset.length),
 				s = Number(f.dataset.start),
 				m = (d >> s) & ((1 << l) - 1);
 
-			f.binary.innerHTML = pad(m.toString(2), l);
-			f.hexadecimal.innerHTML = pad(m.toString(16), Math.ceil(l / 4));
+			f.binary.innerHTML = paddedEncode(m, l, 2);
+			f.hexadecimal.innerHTML = paddedEncode(m.toString(16), Math.ceil(l / 4));
 		}
 	}
 
