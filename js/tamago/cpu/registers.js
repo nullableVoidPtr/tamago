@@ -1,5 +1,5 @@
 import ports from "../data/ports.js";
-
+import paddedEncode from "./encode.js"
 // ==== Bank Switch ====
 function write_bank(reg, value) {
 	this._cpureg[reg] = value;
@@ -44,15 +44,10 @@ function read_portb_data(reg, value) {
 	return (mask & this._cpureg[0x16]) | (~mask & input);
 }
 
-// --- REGISTER LAYOUT ---
-function pad(s, l) {
-	return "00000000".substr(0, l).substr(s.length) + s;
-}
-
 // Default register actions
 function undef_read(reg) {
 	console.log(
-		pad(this._cpureg[0].toString(16), 2),
+		paddedEncode(this._cpureg[0], 2),
 		this.pc.toString(16),
 		"Unhandled register read  (" + (0x3000+reg).toString(16) + ")", 
 		"             ", 
@@ -65,12 +60,12 @@ function undef_read(reg) {
 
 function undef_write(reg, data) {
 	console.log(
-		pad(this._cpureg[0].toString(16), 2),					
+		paddedEncode(this._cpureg[0], 2),					
 		this.pc.toString(16),
 		"Unhandled register write (" + (0x3000+reg).toString(16) + ")", 
-		pad(data.toString(16),2), 
+		paddedEncode(data, 2), 
 		"-", 
-		pad(data.toString(2), 8), 
+		paddedEncode(data, 8, 2), 
 		(ports[reg|0x3000] || {}).name || "---");
 	this._cpureg[reg] = data;
 }
