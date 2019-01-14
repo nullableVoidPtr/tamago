@@ -5,7 +5,7 @@ import map_registers from "./registers.js";
 export var ACCESS_READ  = 0x01;
 export var ACCESS_WRITE = 0x02;
 
-export default class Tamagotchi extends r6502 {
+export default class extends r6502 {
 	constructor(bios) {
 		super();
 

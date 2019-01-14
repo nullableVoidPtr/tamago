@@ -1,6 +1,5 @@
 import instructions from "../data/instructions.js";
 import ports from "../data/ports.js";
-import config from "../config.js";
 
 export default function(count, address, cpu) {
 	var i = [];
