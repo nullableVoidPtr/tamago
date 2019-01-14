@@ -3,13 +3,10 @@ import Tamagotchi, {ACCESS_READ, ACCESS_WRITE} from "./cpu/tamagotchi.js";
 import disassemble from "./cpu/disassembler.js";
 import ports from "./data/ports.js";
 
-function toHex(w, i) {
-	i = i.toString(16).toUpperCase();
+function paddedEncode(n, width, radix = 16) {
+	n = n.toString(radix).toUpperCase();
 
-	var zeros = "0";
-	while (zeros.length < w) { zeros += zeros; }
-
-	return zeros.substr(0, w).substr(i.length) + i;
+	return "0".repeat(width).substr(n.length) + n;
 }
 
 window.customElements.define('tamago-display', class TamagoDisplay extends HTMLElement {
@@ -246,7 +243,7 @@ window.customElements.define('hex-dump', class HexDump extends HTMLElement {
 			if (i % this.rowLength == 0) {
 				var row = document.createElement("tr");
 				var offset = document.createElement("th");
-				offset.innerText = toHex(4, this.virtualOffset + i);
+				offset.innerText = paddedEncode(this.virtualOffset + i, 4);
 				row.appendChild(offset);
 				table.appendChild(row);
 			}
@@ -273,7 +270,7 @@ window.customElements.define('hex-dump', class HexDump extends HTMLElement {
 				cell.classList.toggle('read', acc & ACCESS_READ);
 				cell.classList.toggle('write', acc & ACCESS_WRITE);
 			}
-			cell.innerHTML = toHex(2, memory[i]);
+			cell.innerHTML = paddedEncode(memory[i], 2);
 		}
 	}
 
@@ -447,7 +444,7 @@ window.customElements.define('disassembly-listing', class Disassembly extends HT
 
 		// PC isn't were it should be
 		if (current == -1) {
-			this.offset = this.system.pc;
+			this.offset = system.pc;
 			disasm = disassemble(this.instructionCount, this.offset, system);
 		} else if (current >= bias && disasm.length == this.instructionCount) {
 			this.offset = disasm[current-bias].location;
@@ -456,7 +453,7 @@ window.customElements.define('disassembly-listing', class Disassembly extends HT
 
 		for (const [i, g] of Object.entries(disasm)) {
 			var instruction = this.instructions[i];
-			instruction.address.innerHTML = toHex(4, g.location)
+			instruction.address.innerHTML = paddedEncode(g.location, 4)
 			instruction.opcode.innerHTML = g.instruction;
 			instruction.operand.innerHTML = ((g.data === null) ? "" : g.data).toString(16).toUpperCase();
 			instruction.hex.innerHTML = g.bytes;
@@ -569,7 +566,7 @@ window.customElements.define('cpu-info', class CPUInfo extends HTMLElement {
 
 	update(system) {
 		for (const [register, elem] of Object.entries(this.registers)){
-			elem.innerHTML = toHex(2, system[register]);
+			elem.innerHTML = paddedEncode(system[register], 2);
 		}
 
 		for (const [flag, elem] of Object.entries(this.flags)) {
@@ -928,7 +925,6 @@ fetch("files/tamago.bin").then(response => {
 	}
 	return response.arrayBuffer();
 }).then(bios => {
-	// Start the application when BIOS is done
 	for (var elem of document.querySelectorAll("tamago")) {
 		new Tamago(elem, bios);
 	}
